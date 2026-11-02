@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic AI.M Score — Groupe Alliance Electronics — by Puissance AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+:root {
+    --pai-blue: #0068FF;
+    --pai-dark: #171B20;
+    --pai-light: #EBEFF6;
+    --green: #22C55E;
+    --orange: #F59E0B;
+    --red: #EF4444;
+    --yellow: #FBBF24;
+    --teal: #0d7377;
+    --gold: #c8a951;
+    --navy: #1A3A5A;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',Arial,sans-serif; color:var(--pai-dark); background:#fff; line-height:1.6; }
+
+/* NAV */
+.nav { position:sticky; top:0; z-index:100; background:var(--pai-dark); padding:12px 32px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+.nav a { color:var(--pai-light); text-decoration:none; font-size:13px; font-weight:500; opacity:0.8; transition:opacity 0.2s; white-space:nowrap; }
+.nav a:hover { opacity:1; }
+.nav .brand { font-weight:700; font-size:16px; color:#fff; opacity:1; margin-right:auto; }
+
+/* SECTIONS */
+section { padding:64px 32px; max-width:1100px; margin:0 auto; }
+section:nth-child(even of section) { background:var(--pai-light); max-width:100%; }
+section:nth-child(even of section) > .inner { max-width:1100px; margin:0 auto; }
+h2 { font-size:28px; font-weight:700; margin-bottom:8px; color:var(--pai-dark); }
+h2 .num { color:var(--pai-blue); }
+.subtitle { color:#666; font-size:15px; margin-bottom:32px; }
+
+/* HERO */
+.hero { background:linear-gradient(135deg, var(--pai-dark) 0%, #1e293b 100%); color:var(--pai-light); padding:80px 32px 64px; text-align:center; }
+.hero h1 { font-size:36px; font-weight:700; margin-bottom:8px; }
+.hero .company { font-size:48px; font-weight:700; color:var(--pai-blue); margin-bottom:24px; }
+.hero .meta { display:flex; justify-content:center; gap:40px; flex-wrap:wrap; margin-top:24px; }
+.hero .meta-item { text-align:center; }
+.hero .meta-item .val { font-size:24px; font-weight:700; }
+.hero .meta-item .lbl { font-size:13px; opacity:0.7; }
+
+/* AIM GAUGE */
+.aim-gauge { text-align:center; margin:40px 0; position:relative; }
+.aim-gauge .score { font-size:72px; font-weight:700; line-height:1; }
+.aim-gauge .label { font-size:16px; color:#666; margin-top:8px; position:relative; display:inline-block; }
+.aim-bar { width:100%; max-width:500px; height:12px; background:linear-gradient(to right, var(--red), var(--orange), var(--green)); border-radius:6px; margin:16px auto; position:relative; }
+.aim-bar .marker { position:absolute; top:-6px; width:4px; height:24px; background:var(--pai-dark); border-radius:2px; transform:translateX(-50%); }
+
+/* CARDS GRID */
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin:24px 0; }
+.card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.08); position:relative; }
+.card .val { font-size:28px; font-weight:700; }
+.card .sub-val { font-size:16px; font-weight:500; color:#555; }
+.card .lbl { font-size:13px; color:#666; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
+.card .comment { font-size:12px; color:#888; margin-top:8px; line-height:1.4; }
+.card.ok { border-left:4px solid var(--green); }
+.card.warn { border-left:4px solid var(--orange); }
+.card.alert { border-left:4px solid var(--red); }
+
+/* TOOLTIP — Refonte complète */
+.tt { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--teal); color:#fff; font-size:11px; font-weight:700; cursor:pointer; position:absolute; top:12px; right:12px; z-index:10; user-select:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.tt.inline { position:relative; top:auto; right:auto; margin-left:6px; vertical-align:middle; }
+.tt-pop {
+    display:none; position:fixed; background:#fff; border:1px solid #ddd;
+    border-radius:10px; padding:16px 18px; max-width:min(340px, calc(100vw - 16px)); width:max-content;
+    box-shadow:0 8px 24px rgba(0,0,0,0.18); z-index:9999; font-size:12px;
+    line-height:1.6; opacity:0; transition:opacity 0.15s ease;
+    pointer-events:auto; word-break:break-word;
+}
+.tt-pop.show { display:block; opacity:1; }
+.tt-pop strong { color:var(--teal); }
+
+/* DONUT */
+.donut-container { display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap; margin:32px 0; }
+.donut-legend { display:flex; flex-direction:column; gap:12px; }
+.donut-legend .item { display:flex; align-items:center; gap:8px; font-size:14px; }
+.donut-legend .dot { width:14px; height:14px; border-radius:50%; }
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:var(--pai-dark); color:#fff; padding:10px 12px; text-align:left; font-weight:500; position:sticky; top:0; }
+td { padding:8px 12px; border-bottom:1px solid #eee; }
+tr:hover td { background:#f8f9fa; }
+.cat-leader { color:var(--green); font-weight:700; }
+.cat-enthousiaste { color:var(--orange); font-weight:700; }
+.cat-mefiant { color:var(--red); font-weight:700; }
+
+/* FILTERS */
+.filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+.filter-bar select { padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-family:inherit; font-size:13px; background:#fff; cursor:pointer; }
+.filter-bar select:focus { border-color:var(--teal); outline:none; box-shadow:0 0 0 2px rgba(13,115,119,0.2); }
+.filter-count { font-size:13px; color:#666; margin-left:8px; }
+
+/* FILTER BUTTONS (Section 5) */
+.filter-buttons { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.filter-btn { padding:8px 16px; border:1px solid #ccc; border-radius:20px; background:#fff; font-family:inherit; font-size:13px; cursor:pointer; transition:all 0.2s; }
+.filter-btn:hover { border-color:var(--teal); }
+.filter-btn.active { background:var(--teal); color:#fff; border-color:var(--teal); }
+
+/* CATEGORY TAGS */
+.cat-tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; letter-spacing:0.3px; }
+.cat-tag.x { background:#e0f2f1; color:var(--teal); }
+.cat-tag.y { background:#fff8e1; color:#8d6e00; }
+.cat-tag.z { background:#e3f2fd; color:var(--navy); }
+
+/* HEATMAP placeholder */
+.heatmap-container { margin:24px 0; }
+
+/* PLOTLY overrides */
+.js-plotly-plot .plotly .modebar { top:-35px !important; }
+.plotly-chart-container { margin-top:40px; position:relative; }
+
+/* INDICATOR CARDS */
+.ind-detail { font-size:12px; color:#666; margin-top:6px; }
+
+/* SIGNALS */
+.signal { border-radius:12px; padding:20px; margin:12px 0; }
+.signal.good { background:#f0fdf4; border-left:4px solid var(--green); }
+.signal.critique { background:#fef2f2; border-left:4px solid var(--red); }
+.signal.serieux { background:#fff7ed; border-left:4px solid var(--orange); }
+.signal.attention { background:#fffbeb; border-left:4px solid var(--yellow); }
+
+/* ORIENTATION */
+.orientation { background:var(--pai-blue); color:#fff; border-radius:16px; padding:32px; margin:32px 0; text-align:center; }
+.orientation h3 { font-size:20px; margin-bottom:12px; }
+.orientation p { font-size:16px; opacity:0.95; }
+
+/* VERBATIM */
+.verbatim-list { columns:2; column-gap:24px; }
+.verbatim-item { break-inside:avoid; background:#fff; border-radius:8px; padding:12px 16px; margin-bottom:12px; font-size:13px; border-left:3px solid var(--pai-blue); box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+.verbatim-toggle { cursor:pointer; color:var(--teal); font-weight:600; font-size:14px; padding:12px 0; user-select:none; }
+.verbatim-toggle:hover { text-decoration:underline; }
+
+/* LLM ANALYSIS */
+.bloc-theme { background:#fff; border-radius:12px; padding:20px; margin:16px 0; box-shadow:0 1px 3px rgba(0,0,0,0.08); position:relative; }
+.bloc-theme h4 { color:var(--pai-blue); font-size:16px; margin-bottom:8px; }
+.bloc-theme .keyword { font-size:13px; color:#666; font-style:italic; margin-bottom:8px; }
+.bloc-theme ul { padding-left:20px; font-size:13px; }
+.bloc-theme li { margin:4px 0; }
+
+.insight-box { background:linear-gradient(135deg, #1e1b4b, #312e81); color:#fff; border-radius:12px; padding:24px; margin:16px 0; }
+.insight-box h4 { color:var(--pai-blue); margin-bottom:8px; }
+.insight-box p { font-size:14px; line-height:1.6; }
+
+/* PRINT BUTTON */
+.print-btn { position:fixed; bottom:24px; right:24px; width:48px; height:48px; border-radius:50%; background:var(--teal); color:#fff; border:none; font-size:20px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:200; display:flex; align-items:center; justify-content:center; }
+.print-btn:hover { background:#0a5c5f; }
+
+/* FOOTER */
+footer { background:var(--pai-dark); color:var(--pai-light); padding:40px 32px; text-align:center; font-size:13px; }
+footer a { color:var(--pai-blue); }
+
+/* BAR CHARTS */
+.bar-chart { margin:24px 0; }
+.bar-row { display:flex; align-items:center; margin:6px 0; gap:12px; }
+.bar-label { width:200px; font-size:13px; text-align:right; }
+.bar-track-h { flex:1; height:28px; background:#e5e7eb; border-radius:4px; position:relative; overflow:visible; display:flex; align-items:center; }
+.bar-fill-h { height:100%; border-radius:4px; min-width:2px; display:flex; align-items:center; justify-content:flex-end; padding:0 8px; font-size:12px; font-weight:700; color:#fff; }
+.bar-n { font-size:11px; color:#999; margin-left:8px; white-space:nowrap; }
+
+@media (max-width:768px) {
+    .hero h1 { font-size:24px; }
+    .hero .company { font-size:32px; }
+    .cards { grid-template-columns:1fr; }
+    section { padding:32px 16px; }
+    .verbatim-list { columns:1; }
+    .bar-label { width:120px; font-size:12px; }
+    .filter-bar { flex-direction:column; }
+    .tt-pop { max-width:min(320px, 90vw); }
+}
+
+/* ============================================================
+   PRINT / PDF — Format paysage, plaquette commerciale
+   ============================================================ */
+@media print {
+    @page { size:landscape; margin:10mm 12mm; }
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; box-shadow:none !important; animation:none !important; transition:none !important; }
+    body { font-size:11px; line-height:1.4; }
+    .nav { display:none !important; }
+    .print-btn { display:none !important; }
+    .modebar-container, .modebar, .js-plotly-plot .plotly .modebar { display:none !important; }
+    .filter-bar, .filter-buttons, .filter-count { display:none !important; }
+    .verbatim-toggle { display:none !important; }
+    #verbatimGrid { display:none !important; }
+    .tt { display:none !important; }
+    .tt-pop { display:none !important; }
+    section { padding:16px 12px; page-break-inside:auto; }
+    .hero { padding:30px 16px; page-break-after:always; }
+    .hero h1 { font-size:22px; margin-bottom:4px; }
+    .hero .company { font-size:28px; margin-bottom:8px; }
+    h2 { font-size:18px; margin-bottom:8px; }
+    h3 { font-size:15px; margin-bottom:6px; }
+    .card, .signal, .bloc-theme, .insight-box { page-break-inside:avoid; }
+    .card { padding:12px; margin-bottom:8px; }
+    .kpi-grid { display:grid !important; grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
+    table { page-break-inside:auto; font-size:10px; }
+    table th, table td { padding:4px 6px; }
+    tr { page-break-inside:avoid; }
+    .js-plotly-plot { break-inside:avoid; max-height:450px; }
+    .blocs-grid { display:grid !important; grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
+    .bloc-theme { padding:10px; font-size:10px; }
+    .bloc-theme h4 { font-size:12px; margin-bottom:4px; }
+    .bloc-theme ul { margin:4px 0; padding-left:16px; }
+    .bloc-theme li { margin-bottom:2px; }
+    .insight-box { padding:14px 16px; margin-bottom:10px; }
+    .signals-grid { display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:6px !important; }
+    .signal { padding:8px 10px; font-size:10px; }
+    footer { page-break-before:auto; padding:16px; margin-top:12px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="brand">AI.M Score by Puissance<sup>AI</sup></span>
+    <a href="#s1">Contexte</a>
+    <a href="#s2">Photo</a>
+    <a href="#s3">Participants</a>
+    <a href="#s4">Indicateurs</a>
+    <a href="#s5">Verbatims</a>
+    <a href="#s6">Analyse</a>
+    <a href="#s7">Contact</a>
+</nav>
+
+<!-- SECTION 1 — HERO -->
+<div class="hero" id="s1">
+    
+    <h1>AI.M Score by Puissance<sup>AI</sup></h1>
+    <div class="company">Groupe Alliance Electronics</div>
+    <div class="meta">
+        <div class="meta-item"><div class="val">203</div><div class="lbl">r&eacute;pondants</div></div>
+        <div class="meta-item"><div class="val">401</div><div class="lbl">effectif cibl&eacute;</div></div>
+        <div class="meta-item"><div class="val">50.62%</div><div class="lbl">participation</div></div>
+        <div class="meta-item"><div class="val">correct</div><div class="lbl">repr&eacute;sentativit&eacute;</div></div>
+        <div class="meta-item"><div class="val">11</div><div class="lbl">anonymes</div></div>
+    </div>
+    <div class="aim-gauge">
+        <div class="score" style="color:#F59E0B">19.21</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px">sur une échelle de -100 à +100</div>
+        <div class="label">AI.M Score <span class="tt inline" data-tt-key="aim_score_formula">i</span></div>
+        <div class="aim-bar"><div class="marker" style="left:59.605000000000004%"></div></div>
+        <div style="display:flex;justify-content:space-between;max-width:500px;margin:0 auto;font-size:11px;color:rgba(255,255,255,0.5)"><span>-100</span><span>0</span><span>+100</span></div>
+    </div>
+    <div style="font-size:13px;opacity:0.6;margin-top:16px">
+        P&eacute;riode : 08/10/2026 &rarr; 28/10/2026
+    </div>
+</div>
+
+<!-- SECTION 2 — PHOTO -->
+<section id="s2">
+    <h2><span class="num">02</span> La photo de votre organisation</h2>
+    <p class="subtitle">Segmentation des collaborateurs selon leur posture face &agrave; l&#39;IA</p>
+
+    <div class="donut-container">
+        <canvas id="donutChart" width="260" height="260"></canvas>
+        <div class="donut-legend">
+            <div class="item"><div class="dot" style="background:var(--green)"></div> Leaders : 76 (37.44%)</div>
+            <div class="item"><div class="dot" style="background:var(--orange)"></div> Enthousiastes : 90 (44.33%)</div>
+            <div class="item"><div class="dot" style="background:var(--red)"></div> M&eacute;fiants : 37 (18.23%)</div>
+        </div>
+    </div>
+
+    <div class="cards" id="capacityCards"></div>
+
+    <h3 style="margin:32px 0 16px;font-size:18px">AI.M Score par niveau hi&eacute;rarchique</h3>
+    <div class="bar-chart" id="barNiveau"></div>
+
+    <h3 style="margin:32px 0 16px;font-size:18px">AI.M Score par d&eacute;partement</h3>
+    <div class="bar-chart" id="barDept"></div>
+</section>
+
+<!-- SECTION 3 — PARTICIPANTS -->
+<section id="s3" style="background:var(--pai-light)">
+    <div class="inner">
+        <h2><span class="num">03</span> Liste des participants</h2>
+        <p class="subtitle">Classement par cat&eacute;gorie puis par note globale d&eacute;croissante (D1.Confiance + D2.Connaissance + D3.App&eacute;tence)</p>
+        <div class="filter-bar" id="participantFilters"></div>
+        <div class="filter-count" id="participantCount"></div>
+        <div style="overflow-x:auto">
+            <table id="participantsTable"></table>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 4 — INDICATEURS -->
+<section id="s4">
+    <h2><span class="num">04</span> Indicateurs diagnostiques</h2>
+    <p class="subtitle">7 m&eacute;triques pour affiner l&#39;analyse</p>
+
+    <h3 style="margin:24px 0 12px;font-size:18px">Heatmap de la peur <span class="tt inline" data-tt-key="heatmap_peur">i</span></h3>
+    <p style="font-size:13px;color:#666;margin-bottom:16px">Zones de m&eacute;fiance concentr&eacute;es (nombre de m&eacute;fiants / nombre de r&eacute;pondants par niveau hi&eacute;rarchique et d&eacute;partement) &mdash; survolez chaque cellule pour les d&eacute;tails.</p>
+    <div class="plotly-chart-container" id="heatmapPlotly"></div>
+
+    <h3 style="margin:32px 0 12px;font-size:18px">Radar des indicateurs</h3>
+    <div class="plotly-chart-container" id="radarPlotly"></div>
+
+    <h3 style="margin:32px 0 12px;font-size:18px">D&eacute;tail des indicateurs</h3>
+    <div class="cards" id="indicatorCards"></div>
+</section>
+
+<!-- SECTION 5 — VERBATIMS -->
+<section id="s5" style="background:var(--pai-light)">
+    <div class="inner">
+        <h2><span class="num">05</span> Ce que vos collaborateurs imaginent</h2>
+        <p class="subtitle">132 idées brutes exprimées &rarr; <strong>40 projets uniques</strong> après dédoublonnage</p>
+
+        <div id="portfolioSection"></div>
+        <div id="llmFilterBar"></div>
+        <div id="llmSection"></div>
+
+        <div class="verbatim-toggle" id="verbatimToggle" onclick="toggleVerbatims()">&#9654; Afficher les verbatims bruts (132 verbatims)</div>
+        <div id="verbatimGrid" style="display:none">
+            <div class="verbatim-list" id="verbatimList"></div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 6 — ANALYSE -->
+<section id="s6">
+    <h2><span class="num">06</span> Analyse et orientation</h2>
+    <p class="subtitle">Synth&egrave;se factuelle et recommandation</p>
+
+    <h3 style="margin:16px 0 12px;font-size:18px;color:var(--green)">&#x2705; Bonnes nouvelles</h3>
+    <div id="bonnesNouvelles"></div>
+
+    <h3 style="margin:24px 0 12px;font-size:18px;color:var(--red)">&#x26A0;&#xFE0F; D&eacute;fis</h3>
+    <div id="defis"></div>
+
+    <div id="orientationBox"></div>
+</section>
+
+<!-- SECTION 7 — CONTACT -->
+<footer id="s7">
+    <div style="font-size:20px;font-weight:700;margin-bottom:12px">AI.M Score by Puissance<sup>AI</sup></div>
+    <p>5 rue Jean Montavont, 68200 Mulhouse</p>
+    <p><a href="https://www.puissance.ai/contact" target="_blank">https://www.puissance.ai/contact</a></p>
+    <p style="margin-top:24px;opacity:0.5;font-size:11px">Diagnostic réalisé avec la méthodologie AI.M Score — Puissance AI © 2026</p>
+    <p style="opacity:0.4;font-size:11px">Ce rapport est confidentiel. Les données individuelles sont traitées de manière anonymisée.</p>
+</footer>
+
+<!-- PRINT BUTTON -->
+<button class="print-btn" onclick="window.print()" title="Imprimer / Exporter PDF">&#128424;</button>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const tooltips = {"aim_score": {"label": "AI.M Score", "definition": "Indicateur global de maturité IA de l'organisation. Il mesure l'écart entre ceux qui sont prêts à agir (Leaders) et ceux qui freinent (Méfiants).", "calcul": "% Leaders − % Méfiants. Plage : [-100, +100]", "ideal": "Supérieur à 0. Plus le score est élevé, plus l'organisation est prête. Un score positif indique plus de Leaders que de Méfiants."}, "taux_participation": {"label": "Taux de participation", "definition": "Proportion de l'effectif ciblé qui a répondu au questionnaire.", "calcul": "Nombre de répondants ÷ Effectif ciblé × 100", "ideal": "Supérieur à 60% pour une analyse fiable."}, "representativite": {"label": "Représentativité", "definition": "Évaluation de la fiabilité des résultats en fonction du taux de participation.", "calcul": "Moins de 30% = faible, 30-60% = correct, plus de 60% = excellent.", "ideal": "Excellent (plus de 60%)."}, "anonymes": {"label": "Anonymes", "definition": "Nombre de répondants n'ayant pas renseigné leur identité. Un nombre élevé peut indiquer un manque de confiance.", "calcul": "Comptage des répondants sans nom de famille ou sans adresse email.", "ideal": "Le moins possible."}, "leaders": {"label": "Leaders", "definition": "Collaborateurs qui ont une perception positive de l'IA ET qui imaginent des projets concrets. Ce sont les moteurs de la transformation.", "calcul": "Score Vouloir (D1) positif ET Score Prévoir (D3) positif.", "ideal": "Au moins 5 pour constituer un Comité IA."}, "enthousiastes": {"label": "Enthousiastes", "definition": "Collaborateurs positifs envers l'IA mais qui n'ont pas encore d'idées de projets.", "calcul": "Score Vouloir (D1) positif ET Score Prévoir (D3) nul ou négatif.", "ideal": "Réservoir à activer — avec accompagnement, ils deviennent Leaders."}, "confiants": {"label": "Confiants", "definition": "Tous les collaborateurs qui ont une perception positive de l'IA. C'est la base d'adhésion.", "calcul": "Leaders + Enthousiastes (Score Vouloir D1 positif).", "ideal": "Au moins 10 personnes et 25% de l'effectif."}, "mefiants": {"label": "Méfiants", "definition": "Collaborateurs qui ne sont pas en confiance avec l'IA.", "calcul": "Score Vouloir (D1) nul ou négatif.", "ideal": "Le moins possible."}, "directeurs_bloquants": {"label": "Directeurs bloquants", "definition": "Membres de la Direction qui ne sont pas en confiance avec l'IA. Si trop nombreux, blocage stratégique.", "calcul": "Niveau Direction (N1) ET Score Vouloir (D1) nul ou négatif, rapporté au total N1.", "ideal": "Moins de 34%."}, "nb_projets": {"label": "Nombre de projets déclarés", "definition": "Volume total d'idées de projets IA exprimées par les collaborateurs.", "calcul": "Comptage de tous les verbatims non vides dans les champs projet.", "ideal": "Au moins 20 idées pour un réservoir exploitable."}, "appetence": {"label": "Appétence (porteurs de projets)", "definition": "Part des collaborateurs qui ont au moins une idée de projet IA.", "calcul": "Nombre de répondants avec au moins 1 projet ÷ Base × 100.", "ideal": "Au moins 25%."}, "heatmap_peur": {"label": "Heatmap de la peur", "definition": "Carte des résistances à l'IA. Chaque case croise un niveau hiérarchique et un département, et montre le % de méfiants.", "calcul": "% de non-confiants (D1 ≤ 0) pour chaque couple Niveau × Département.", "ideal": "Pas de zones rouges au niveau Direction ou Management."}, "fracture_savoir": {"label": "Fracture du savoir", "definition": "Mesure l'écart de compétences IA entre collaborateurs.", "calcul": "Écart-type des scores Savoir (D2).", "ideal": "Inférieur ou égal à 15."}, "naivete": {"label": "Taux de naïveté", "definition": "Part des collaborateurs enthousiastes avec des idées mais sans les compétences.", "calcul": "Vouloir (D1) positif ET Savoir (D2) nul ou négatif ET Prévoir (D3) positif.", "ideal": "Inférieur ou égal à 30%."}, "dissonance": {"label": "Taux de dissonance", "definition": "Part des collaborateurs dont les réponses sont incohérentes entre elles.", "calcul": "Dimensions normalisées sur [-2.5, +2.5]. Dissonant si écart > 1.2 entre deux dimensions.", "ideal": "Inférieur ou égal à 30%."}, "remise_en_question": {"label": "Capacité de remise en question", "definition": "Parmi ceux qui ont des idées, combien imaginent des projets pour leur propre métier ?", "calcul": "Répondants avec projet 'pour soi' ÷ Répondants avec au moins 1 projet × 100.", "ideal": "Au moins 70%."}, "engagement_collectif": {"label": "Engagement collectif", "definition": "Parmi ceux qui ont des idées, combien pensent à des projets utiles pour toute l'entreprise ?", "calcul": "Répondants avec projet 'pour les autres' ÷ Répondants avec au moins 1 projet × 100.", "ideal": "Au moins 30%."}, "pct_consultants": {"label": "% Consultants", "definition": "Part de ceux qui imaginent des projets pour les autres mais pas pour eux-mêmes.", "calcul": "Projet pour les autres ET PAS pour soi ÷ Avec au moins 1 projet × 100.", "ideal": "Inférieur ou égal à 30%."}, "densite_projection": {"label": "Densité de projection", "definition": "Rapport entre les projets uniques et le nombre brut. Indique la diversité réelle des idées.", "calcul": "Projets dédoublonnés ÷ Projets bruts × 100.", "ideal": "Au moins 25%."}, "entonnoir_xyz": {"label": "Entonnoir stratégique X/Y/Z", "definition": "Répartition des projets en trois axes : X = Relation Client, Y = Productivité, Z = R&D.", "calcul": "Classification de chaque projet dédoublonné dans l'un des 3 axes.", "ideal": "Tous les axes représentés."}};
+const aimParNiveau = [{"code": "N1", "label": "Direction / Responsable strat\u00e9gique", "nb_repondants": 17, "nb_leaders": 14, "nb_mefiants": 0, "aim_score": 82.35}, {"code": "N2", "label": "Cadre / Manager", "nb_repondants": 90, "nb_leaders": 48, "nb_mefiants": 10, "aim_score": 42.22}, {"code": "N3", "label": "Employ\u00e9 / Technicien", "nb_repondants": 96, "nb_leaders": 14, "nb_mefiants": 27, "aim_score": -13.54}];
+const aimParDept = [{"code": "P1", "label": "Direction g\u00e9n\u00e9rale", "nb_repondants": 12, "aim_score": 66.67}, {"code": "P2", "label": "Relation client", "nb_repondants": 31, "aim_score": 25.8}, {"code": "P3", "label": "Production, RH, Logistique", "nb_repondants": 113, "aim_score": 5.31}, {"code": "P4", "label": "Comptabilit\u00e9, Administration", "nb_repondants": 21, "aim_score": 28.57}, {"code": "P5", "label": "R&D, Innovation", "nb_repondants": 26, "aim_score": 42.31}];
+const heatmapData = [{"departement": "P2", "niveau": "N1", "pct_non_confiants": 0.0, "nb_repondants": 2, "nb_mefiants": 0}, {"departement": "P3", "niveau": "N1", "pct_non_confiants": 0.0, "nb_repondants": 4, "nb_mefiants": 0}, {"departement": "P4", "niveau": "N1", "pct_non_confiants": 0.0, "nb_repondants": 0, "nb_mefiants": 0}, {"departement": "P5", "niveau": "N1", "pct_non_confiants": 0.0, "nb_repondants": 1, "nb_mefiants": 0}, {"departement": "P1", "niveau": "N1", "pct_non_confiants": 0.0, "nb_repondants": 10, "nb_mefiants": 0}, {"departement": "P2", "niveau": "N2", "pct_non_confiants": 13.33, "nb_repondants": 15, "nb_mefiants": 2}, {"departement": "P3", "niveau": "N2", "pct_non_confiants": 13.33, "nb_repondants": 45, "nb_mefiants": 6}, {"departement": "P4", "niveau": "N2", "pct_non_confiants": 8.33, "nb_repondants": 12, "nb_mefiants": 1}, {"departement": "P5", "niveau": "N2", "pct_non_confiants": 5.88, "nb_repondants": 17, "nb_mefiants": 1}, {"departement": "P1", "niveau": "N2", "pct_non_confiants": 0.0, "nb_repondants": 1, "nb_mefiants": 0}, {"departement": "P2", "niveau": "N3", "pct_non_confiants": 7.14, "nb_repondants": 14, "nb_mefiants": 1}, {"departement": "P3", "niveau": "N3", "pct_non_confiants": 31.25, "nb_repondants": 64, "nb_mefiants": 20}, {"departement": "P4", "niveau": "N3", "pct_non_confiants": 33.33, "nb_repondants": 9, "nb_mefiants": 3}, {"departement": "P5", "niveau": "N3", "pct_non_confiants": 25.0, "nb_repondants": 8, "nb_mefiants": 2}, {"departement": "P1", "niveau": "N3", "pct_non_confiants": 100.0, "nb_repondants": 1, "nb_mefiants": 1}];
+const participants = [{"prenom_nom": "230849000001536032", "fonction": null, "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 7.5, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 2.5, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 17.8, "note_globale": 17.5, "categorie": "Leader", "is_anonymous": true, "rang": 1}, {"prenom_nom": "Paul VIDAL", "fonction": "Responsable achat", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 7.5, "d2_total": 6.0, "d3_total": 2.5, "d1_display": 2.5, "d2_display": 2.0, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 2}, {"prenom_nom": "Pierre Thomas", "fonction": "Responsable IT", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 3}, {"prenom_nom": "Mohamed RZIG", "fonction": "Acheteur groupe", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 4}, {"prenom_nom": "Alvaro Costa", "fonction": "Transformation & Innovation – Projets transverses et innovation industrielle", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 5}, {"prenom_nom": "Alexandre Yos", "fonction": "Résponsable étude et developpement", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 6}, {"prenom_nom": "Maher MEJRI", "fonction": "Responsable Amélioration Continue", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 7.5, "d2_total": 6.0, "d3_total": 2.5, "d1_display": 2.5, "d2_display": 2.0, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 7}, {"prenom_nom": "Saif Selmi", "fonction": "Technicien test", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 17.1, "note_globale": 16.0, "categorie": "Leader", "is_anonymous": false, "rang": 8}, {"prenom_nom": "Mohamed Aymen BADRI", "fonction": "Directeur des opérations Altrics AAA", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 7.5, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 2.5, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 16.7, "note_globale": 15.0, "categorie": "Leader", "is_anonymous": false, "rang": 9}, {"prenom_nom": "Eddy Steegmans", "fonction": "technicien de maintenance, agent de prevention,livreur et acheteur d'outillage", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 16.7, "note_globale": 15.0, "categorie": "Leader", "is_anonymous": false, "rang": 10}, {"prenom_nom": "130849000001511104", "fonction": "Data Analyst", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 16.7, "note_globale": 15.0, "categorie": "Leader", "is_anonymous": true, "rang": 11}, {"prenom_nom": "Cédric CUNY", "fonction": "RSSI Groupe", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 16.7, "note_globale": 15.0, "categorie": "Leader", "is_anonymous": false, "rang": 12}, {"prenom_nom": "Oumaima ENNSEIRI", "fonction": "Responsable comptable", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 16.7, "note_globale": 15.0, "categorie": "Leader", "is_anonymous": false, "rang": 13}, {"prenom_nom": "Ana Pinheiro", "fonction": "Plant Manager du site Portugal", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 6.0, "d2_total": 6.0, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.0, "d3_display": 0.83, "note_sur_20": 16.4, "note_globale": 14.5, "categorie": "Leader", "is_anonymous": false, "rang": 14}, {"prenom_nom": "José Oliveira", "fonction": "Responsable Tests, Analyse, Réparation et SAV", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 6.0, "d2_total": 6.0, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 2.0, "d3_display": 0.83, "note_sur_20": 16.4, "note_globale": 14.5, "categorie": "Leader", "is_anonymous": false, "rang": 15}, {"prenom_nom": "Ali Ragoubi", "fonction": "Chef Atelier Altrics", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 7.5, "d2_total": 4.5, "d3_total": 2.5, "d1_display": 2.5, "d2_display": 1.5, "d3_display": 0.83, "note_sur_20": 16.4, "note_globale": 14.5, "categorie": "Leader", "is_anonymous": false, "rang": 16}, {"prenom_nom": "Vincent Stébé", "fonction": "Tech Lead", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 1.17, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 16.0, "note_globale": 13.5, "categorie": "Leader", "is_anonymous": false, "rang": 17}, {"prenom_nom": "Alexandre Mathieu", "fonction": "MD", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 7.5, "d2_total": 4.5, "d3_total": 1.5, "d1_display": 2.5, "d2_display": 1.5, "d3_display": 0.5, "note_sur_20": 16.0, "note_globale": 13.5, "categorie": "Leader", "is_anonymous": false, "rang": 18}, {"prenom_nom": "yann Turcant", "fonction": "MD Prototypages et petites series", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 7.5, "d2_total": 4.5, "d3_total": 1.5, "d1_display": 2.5, "d2_display": 1.5, "d3_display": 0.5, "note_sur_20": 16.0, "note_globale": 13.5, "categorie": "Leader", "is_anonymous": false, "rang": 19}, {"prenom_nom": "Xavier Henck", "fonction": "ANALYSTE PERF.", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 16.0, "note_globale": 13.5, "categorie": "Leader", "is_anonymous": false, "rang": 20}, {"prenom_nom": "Sébastien Huguet", "fonction": "Directeur Commercial Groupe", "departement": "Relation client", "departement_code": "P2", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 6.0, "d2_total": 4.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 1.5, "d3_display": 0.83, "note_sur_20": 15.8, "note_globale": 13.0, "categorie": "Leader", "is_anonymous": false, "rang": 21}, {"prenom_nom": "Jean-Michel Haas", "fonction": "Directeur Financier BU AAA", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 6.0, "d3_total": 2.5, "d1_display": 1.5, "d2_display": 2.0, "d3_display": 0.83, "note_sur_20": 15.8, "note_globale": 13.0, "categorie": "Leader", "is_anonymous": false, "rang": 22}, {"prenom_nom": "Geert Poisquet", "fonction": "Chief R&D", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 6.0, "d2_total": 4.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 1.5, "d3_display": 0.83, "note_sur_20": 15.8, "note_globale": 13.0, "categorie": "Leader", "is_anonymous": false, "rang": 23}, {"prenom_nom": "Achraf Nekhili", "fonction": "Chef de projet senior/ Senior Project Manager", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 4.5, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 1.5, "d3_display": 0.83, "note_sur_20": 15.8, "note_globale": 13.0, "categorie": "Leader", "is_anonymous": false, "rang": 24}, {"prenom_nom": "Zakariae AKKAD", "fonction": "Data Analyst", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 1.17, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 15.6, "note_globale": 12.5, "categorie": "Leader", "is_anonymous": false, "rang": 25}, {"prenom_nom": "Abderazek mahjbi", "fonction": "Ingénieur TEST Fonctionnel", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 1.5, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Leader", "is_anonymous": false, "rang": 26}, {"prenom_nom": "Daniel Mawas", "fonction": "CTO", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 4.5, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 1.5, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Leader", "is_anonymous": false, "rang": 27}, {"prenom_nom": "Malet Sébastien", "fonction": "responsable up cms", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 1.5, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Leader", "is_anonymous": false, "rang": 28}, {"prenom_nom": "Udo Korsmit", "fonction": "N.V.T.", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 1.0, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Leader", "is_anonymous": false, "rang": 29}, {"prenom_nom": "Steve COTTINEAU", "fonction": "Directeur Commercial", "departement": "Relation client", "departement_code": "P2", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 7.5, "d2_total": 3.0, "d3_total": 1.5, "d1_display": 2.5, "d2_display": 1.0, "d3_display": 0.5, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Leader", "is_anonymous": false, "rang": 30}, {"prenom_nom": "rabeb ouertani", "fonction": "Approvisionneuse", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 7.5, "d3_total": 2.5, "d1_display": 0.67, "d2_display": 2.5, "d3_display": 0.83, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Leader", "is_anonymous": false, "rang": 31}, {"prenom_nom": "Armel Fourreau", "fonction": "Président", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 4.5, "d2_total": 4.5, "d3_total": 2.5, "d1_display": 1.5, "d2_display": 1.5, "d3_display": 0.83, "note_sur_20": 15.1, "note_globale": 11.5, "categorie": "Leader", "is_anonymous": false, "rang": 32}, {"prenom_nom": "Louy RUPP", "fonction": "Réception Magasin", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 7.5, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 2.5, "d3_display": 0.5, "note_sur_20": 14.9, "note_globale": 11.0, "categorie": "Leader", "is_anonymous": false, "rang": 33}, {"prenom_nom": "Elmi Ghazali", "fonction": "Planning leader", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 3.5, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 1.17, "d3_display": 0.5, "note_sur_20": 14.9, "note_globale": 11.0, "categorie": "Leader", "is_anonymous": false, "rang": 34}, {"prenom_nom": "TAYSIR BANE", "fonction": "Acheteuse HPR", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 1.17, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 14.9, "note_globale": 11.0, "categorie": "Leader", "is_anonymous": false, "rang": 35}, {"prenom_nom": "Angélique CASASSAS", "fonction": "Marketing & Communication Manager", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 6.0, "d3_total": 1.5, "d1_display": 1.17, "d2_display": 2.0, "d3_display": 0.5, "note_sur_20": 14.9, "note_globale": 11.0, "categorie": "Leader", "is_anonymous": false, "rang": 36}, {"prenom_nom": "Marc MANGIN", "fonction": "Chef comptable", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 2.0, "d3_total": 2.5, "d1_display": 2.0, "d2_display": 0.67, "d3_display": 0.83, "note_sur_20": 14.7, "note_globale": 10.5, "categorie": "Leader", "is_anonymous": false, "rang": 37}, {"prenom_nom": "Lilian GOUGEON", "fonction": "Chargé UP REWORK", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 6.0, "d3_total": 2.5, "d1_display": 0.67, "d2_display": 2.0, "d3_display": 0.83, "note_sur_20": 14.7, "note_globale": 10.5, "categorie": "Leader", "is_anonymous": false, "rang": 38}, {"prenom_nom": "Nicolas Rabbé", "fonction": "Customer Program Manager", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 3.5, "d3_total": 2.5, "d1_display": 1.5, "d2_display": 1.17, "d3_display": 0.83, "note_sur_20": 14.7, "note_globale": 10.5, "categorie": "Leader", "is_anonymous": false, "rang": 39}, {"prenom_nom": "Majdouline FATIHI", "fonction": "Contrôleur de gestion senior", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 3.5, "d3_total": 2.5, "d1_display": 1.5, "d2_display": 1.17, "d3_display": 0.83, "note_sur_20": 14.7, "note_globale": 10.5, "categorie": "Leader", "is_anonymous": false, "rang": 40}, {"prenom_nom": "Alexandre Gressler", "fonction": "M&A & Strategic Project Manager", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 14.2, "note_globale": 9.5, "categorie": "Leader", "is_anonymous": false, "rang": 41}, {"prenom_nom": "Nicolas GILLMANN", "fonction": "Responsable des Opérations", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 14.2, "note_globale": 9.5, "categorie": "Leader", "is_anonymous": false, "rang": 42}, {"prenom_nom": "Frederic Thiebaud", "fonction": "CEO ACE JTC et COO alliance-electonics", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 4.5, "d2_total": 3.5, "d3_total": 1.5, "d1_display": 1.5, "d2_display": 1.17, "d3_display": 0.5, "note_sur_20": 14.2, "note_globale": 9.5, "categorie": "Leader", "is_anonymous": false, "rang": 43}, {"prenom_nom": "Stéphane GALMEL", "fonction": "KEY ACCOUNT MANAGER", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 14.2, "note_globale": 9.5, "categorie": "Leader", "is_anonymous": false, "rang": 44}, {"prenom_nom": "khouloud Khherif", "fonction": "Technicienne méthodes Indus & (Data group)", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 4.5, "d3_total": 1.5, "d1_display": 1.0, "d2_display": 1.5, "d3_display": 0.5, "note_sur_20": 14.0, "note_globale": 9.0, "categorie": "Leader", "is_anonymous": false, "rang": 45}, {"prenom_nom": "Jean-Jacques KIEFFER", "fonction": "Responsable amélioration continue", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 3.0, "d3_total": 2.5, "d1_display": 1.17, "d2_display": 1.0, "d3_display": 0.83, "note_sur_20": 14.0, "note_globale": 9.0, "categorie": "Leader", "is_anonymous": false, "rang": 46}, {"prenom_nom": "Elyes MEZIANE", "fonction": "Quality System Manager", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 3.5, "d3_total": 2.5, "d1_display": 1.0, "d2_display": 1.17, "d3_display": 0.83, "note_sur_20": 14.0, "note_globale": 9.0, "categorie": "Leader", "is_anonymous": false, "rang": 47}, {"prenom_nom": "Edgar Araujo", "fonction": "SMT Manufacturing & Operations Manager", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 4.5, "d3_total": 2.5, "d1_display": 0.67, "d2_display": 1.5, "d3_display": 0.83, "note_sur_20": 14.0, "note_globale": 9.0, "categorie": "Leader", "is_anonymous": false, "rang": 48}, {"prenom_nom": "Frédéric GARDES", "fonction": "Responsable Tests", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 2.5, "d3_total": 1.5, "d1_display": 1.5, "d2_display": 0.83, "d3_display": 0.5, "note_sur_20": 13.8, "note_globale": 8.5, "categorie": "Leader", "is_anonymous": false, "rang": 49}, {"prenom_nom": "Eric MATHIE", "fonction": "Senior Key Account Manager", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 3.5, "d3_total": 2.5, "d1_display": 0.67, "d2_display": 1.17, "d3_display": 0.83, "note_sur_20": 13.6, "note_globale": 8.0, "categorie": "Leader", "is_anonymous": false, "rang": 50}, {"prenom_nom": "WALID GHOUL", "fonction": "Directeur Industriel Groupe", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 2.0, "d2_total": 4.5, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 1.5, "d3_display": 0.5, "note_sur_20": 13.6, "note_globale": 8.0, "categorie": "Leader", "is_anonymous": false, "rang": 51}, {"prenom_nom": "HELA LABIDI", "fonction": "Responsable qualité", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 0.0, "d3_total": 1.5, "d1_display": 2.0, "d2_display": 0.0, "d3_display": 0.5, "note_sur_20": 13.3, "note_globale": 7.5, "categorie": "Leader", "is_anonymous": false, "rang": 52}, {"prenom_nom": "Elisabeth PARTOUCHE", "fonction": "Directrice Générale", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 2.5, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.83, "note_sur_20": 13.3, "note_globale": 7.5, "categorie": "Leader", "is_anonymous": false, "rang": 53}, {"prenom_nom": "Ammar GUERCHI", "fonction": "Responsable pole expertise", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 0.0, "d3_total": 2.5, "d1_display": 1.5, "d2_display": 0.0, "d3_display": 0.83, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Leader", "is_anonymous": false, "rang": 54}, {"prenom_nom": "Makrem Chabchoub", "fonction": "Chef d'équipe CMS", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 1.0, "d3_total": 1.5, "d1_display": 1.5, "d2_display": 0.33, "d3_display": 0.5, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Leader", "is_anonymous": false, "rang": 55}, {"prenom_nom": "Nathalie MERCIER", "fonction": "Directrice des Ressources Humaines et HSE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 2.0, "d2_total": 3.5, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 1.17, "d3_display": 0.5, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Leader", "is_anonymous": false, "rang": 56}, {"prenom_nom": "Francisco Amorim", "fonction": "Responsable Qualité", "departement": "Direction générale", "departement_code": "P1", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 3.5, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 1.17, "d3_display": 0.5, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Leader", "is_anonymous": false, "rang": 57}, {"prenom_nom": "olivier MANDINE", "fonction": "Chef de projet indistrialisation", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 3.5, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 1.17, "d3_display": 0.5, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Leader", "is_anonymous": false, "rang": 58}, {"prenom_nom": "VERONIQUE MAZIER", "fonction": "DRH", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 2.0, "d2_total": 3.5, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 1.17, "d3_display": 0.5, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Leader", "is_anonymous": false, "rang": 59}, {"prenom_nom": "Stéphane LOISEL", "fonction": "Directeur Technique", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 1.0, "d3_total": 2.5, "d1_display": 1.0, "d2_display": 0.33, "d3_display": 0.83, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Leader", "is_anonymous": false, "rang": 60}, {"prenom_nom": "TARDIF AUrélien", "fonction": "RESP production", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Leader", "is_anonymous": false, "rang": 61}, {"prenom_nom": "SAMI ZBIDI", "fonction": "Responsable Méthodes, Process, Maintenance et Test", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 1.0, "d3_total": 1.5, "d1_display": 1.17, "d2_display": 0.33, "d3_display": 0.5, "note_sur_20": 12.7, "note_globale": 6.0, "categorie": "Leader", "is_anonymous": false, "rang": 62}, {"prenom_nom": "Clémentine Charbey", "fonction": "Risk and compliance officer", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 12.5, "note_globale": 5.5, "categorie": "Leader", "is_anonymous": false, "rang": 63}, {"prenom_nom": "Cécile STUDER", "fonction": "Inventory Controller_Customer Service", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 1.0, "d3_total": 1.5, "d1_display": 1.0, "d2_display": 0.33, "d3_display": 0.5, "note_sur_20": 12.4, "note_globale": 5.5, "categorie": "Leader", "is_anonymous": false, "rang": 64}, {"prenom_nom": "Johan Mangelschots", "fonction": "Werkvoorbereiding - SMD ondersteuning - algemene technische ondersteuning", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 3.0, "d3_total": 1.5, "d1_display": 0.33, "d2_display": 1.0, "d3_display": 0.5, "note_sur_20": 12.4, "note_globale": 5.5, "categorie": "Leader", "is_anonymous": false, "rang": 65}, {"prenom_nom": "mohamed Naceur BEN ALI", "fonction": "Master planner", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 0.0, "d3_total": 2.5, "d1_display": 1.0, "d2_display": 0.0, "d3_display": 0.83, "note_sur_20": 12.4, "note_globale": 5.5, "categorie": "Leader", "is_anonymous": false, "rang": 66}, {"prenom_nom": "Olivier Piotrowski", "fonction": "Chef de projets fonctionnels", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 0.0, "d3_total": 1.5, "d1_display": 1.17, "d2_display": 0.0, "d3_display": 0.5, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Leader", "is_anonymous": false, "rang": 67}, {"prenom_nom": "Salah ben Saad", "fonction": "Responsable test Fonctionnel", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 1.0, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 0.33, "d3_display": 0.5, "note_sur_20": 12.0, "note_globale": 4.5, "categorie": "Leader", "is_anonymous": false, "rang": 68}, {"prenom_nom": "Debora Greco", "fonction": "Sales representative Italie et Europe du nord", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 0.33, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 12.0, "note_globale": 4.5, "categorie": "Leader", "is_anonymous": false, "rang": 69}, {"prenom_nom": "Benoit DESGAGES", "fonction": "Coordinateur industrialisation et amco", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 2.0, "d3_total": 1.5, "d1_display": 0.33, "d2_display": 0.67, "d3_display": 0.5, "note_sur_20": 12.0, "note_globale": 4.5, "categorie": "Leader", "is_anonymous": false, "rang": 70}, {"prenom_nom": "Sophie BRUNEAU", "fonction": "Technicienne Méthodes", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 2.0, "d3_total": 1.0, "d1_display": 0.33, "d2_display": 0.67, "d3_display": 0.33, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Leader", "is_anonymous": false, "rang": 71}, {"prenom_nom": "Caterina D'INGEO", "fonction": "Responsable approvisionnements", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": -1.5, "d3_total": 1.5, "d1_display": 1.17, "d2_display": -0.5, "d3_display": 0.5, "note_sur_20": 11.6, "note_globale": 3.5, "categorie": "Leader", "is_anonymous": false, "rang": 72}, {"prenom_nom": "Nour Elhouda Youssfi", "fonction": "Préparatrice Méthode", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 1.0, "d3_total": 1.5, "d1_display": 0.33, "d2_display": 0.33, "d3_display": 0.5, "note_sur_20": 11.5, "note_globale": 3.5, "categorie": "Leader", "is_anonymous": false, "rang": 73}, {"prenom_nom": "Rita Vitória", "fonction": "Métodos", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 0.0, "d3_total": 1.5, "d1_display": 0.67, "d2_display": 0.0, "d3_display": 0.5, "note_sur_20": 11.6, "note_globale": 3.5, "categorie": "Leader", "is_anonymous": false, "rang": 74}, {"prenom_nom": "David PUSCA", "fonction": "Codification et support technique", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 0.0, "d3_total": 1.5, "d1_display": 0.33, "d2_display": 0.0, "d3_display": 0.5, "note_sur_20": 11.1, "note_globale": 2.5, "categorie": "Leader", "is_anonymous": false, "rang": 75}, {"prenom_nom": "Patrick GUERINEL", "fonction": "conseillé", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.0, "d2_total": -7.5, "d3_total": 2.5, "d1_display": 1.33, "d2_display": -2.5, "d3_display": 0.83, "note_sur_20": 9.5, "note_globale": -1.0, "categorie": "Leader", "is_anonymous": false, "rang": 76}, {"prenom_nom": "AMINE HENCHIRI", "fonction": "TEST ICT", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 7.5, "d2_total": 6.0, "d3_total": 0.0, "d1_display": 2.5, "d2_display": 2.0, "d3_display": 0.0, "note_sur_20": 16.0, "note_globale": 13.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 77}, {"prenom_nom": "230849000001513056", "fonction": "Technicien Qualité", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 5.0, "d2_total": 7.5, "d3_total": 0.0, "d1_display": 1.67, "d2_display": 2.5, "d3_display": 0.0, "note_sur_20": 15.6, "note_globale": 12.5, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 78}, {"prenom_nom": "ADEM HLEL", "fonction": "Project Manager", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 7.5, "d2_total": 5.0, "d3_total": 0.0, "d1_display": 2.5, "d2_display": 1.67, "d3_display": 0.0, "note_sur_20": 15.6, "note_globale": 12.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 79}, {"prenom_nom": "DENIS BRUNET", "fonction": "Responsable Test production", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 6.0, "d3_total": 0.0, "d1_display": 2.0, "d2_display": 2.0, "d3_display": 0.0, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 80}, {"prenom_nom": "Seifeddine Larbi", "fonction": "Codificateur", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 7.5, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 2.5, "d3_display": 0.0, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 81}, {"prenom_nom": "Natalie Carneiro", "fonction": "responsable magasin", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 6.0, "d2_total": 6.0, "d3_total": 0.0, "d1_display": 2.0, "d2_display": 2.0, "d3_display": 0.0, "note_sur_20": 15.3, "note_globale": 12.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 82}, {"prenom_nom": "Fabienne ADET", "fonction": "Directrice Générale", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 4.5, "d2_total": 6.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 2.0, "d3_display": 0.0, "note_sur_20": 14.7, "note_globale": 10.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 83}, {"prenom_nom": "khemais badreddine", "fonction": "Approvisionneur", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 6.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 2.0, "d3_display": 0.0, "note_sur_20": 14.7, "note_globale": 10.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 84}, {"prenom_nom": "Sébastien HAMM", "fonction": "Responsable Logistique et Production", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.5, "d2_total": 7.5, "d3_total": 0.0, "d1_display": 0.83, "d2_display": 2.5, "d3_display": 0.0, "note_sur_20": 14.4, "note_globale": 10.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 85}, {"prenom_nom": "Hassen BEN GOUIDER", "fonction": "Programmeur et technicien qualité", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 6.0, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 2.0, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 14.2, "note_globale": 9.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 86}, {"prenom_nom": "Antoine CHAVOUTIER", "fonction": "Commercial", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 5.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 1.67, "d3_display": 0.0, "note_sur_20": 14.2, "note_globale": 9.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 87}, {"prenom_nom": "Devran Yoruk", "fonction": "Administrateur Système et Réseau", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 6.0, "d2_total": 3.0, "d3_total": 0.0, "d1_display": 2.0, "d2_display": 1.0, "d3_display": 0.0, "note_sur_20": 14.0, "note_globale": 9.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 88}, {"prenom_nom": "JEAN-PIERRE WERNETTE", "fonction": "Codification et support technique", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 6.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 2.0, "d3_display": 0.0, "note_sur_20": 14.0, "note_globale": 9.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 89}, {"prenom_nom": "Mohamed ali Labbaoui", "fonction": "Technicien méthode", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 5.0, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 1.67, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 13.8, "note_globale": 8.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 90}, {"prenom_nom": "MAROUA HACHICHA", "fonction": "ACHETEUSE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.5, "d2_total": 5.0, "d3_total": 0.0, "d1_display": 1.17, "d2_display": 1.67, "d3_display": 0.0, "note_sur_20": 13.8, "note_globale": 8.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 91}, {"prenom_nom": "Melvin Romé", "fonction": "Magasinier", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 13.6, "note_globale": 8.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 92}, {"prenom_nom": "victor laurent", "fonction": "ingénieur méca", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 1.17, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 13.6, "note_globale": 8.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 93}, {"prenom_nom": "Mohamed Taher KHADHRAOUI", "fonction": "project manager", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 13.6, "note_globale": 8.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 94}, {"prenom_nom": "Christophe Sauwens", "fonction": "BD", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 13.6, "note_globale": 8.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 95}, {"prenom_nom": "OUABI BADR", "fonction": "Technicien  Logistique", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 3.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 1.0, "d3_display": 0.0, "note_sur_20": 13.3, "note_globale": 7.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 96}, {"prenom_nom": "Isella Frenay", "fonction": "Administration / Compta / HR", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 3.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 1.0, "d3_display": 0.0, "note_sur_20": 13.3, "note_globale": 7.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 97}, {"prenom_nom": "130849000001514032", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 13.3, "note_globale": 7.5, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 98}, {"prenom_nom": "Elodie Dupont", "fonction": "RESPONSABLE MAGASIN", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 99}, {"prenom_nom": "Rached BEN DAOUD", "fonction": "SMT Process", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 100}, {"prenom_nom": "ROSA RAMOS", "fonction": "RESPONSABLE FINANCES, RH, ACHATS", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 101}, {"prenom_nom": "Wendy Hulsmans", "fonction": "Arbeidster", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 102}, {"prenom_nom": "khaled chemlali", "fonction": "It manager", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 103}, {"prenom_nom": "Célia WANNER", "fonction": "Chargée de missions RH", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 104}, {"prenom_nom": "Willy Vermeulen", "fonction": null, "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 105}, {"prenom_nom": "Adrien Kolodziej", "fonction": "Développeur Frontend", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 106}, {"prenom_nom": "230849000001562016", "fonction": null, "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 107}, {"prenom_nom": "MELINDA HATTE", "fonction": "PLANNER", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 108}, {"prenom_nom": "Damien Goapper", "fonction": "DIrecteur BE", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 4.5, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.9, "note_globale": 6.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 109}, {"prenom_nom": "Andre Macedo", "fonction": "Técnico de Eletrónica", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.5, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 0.83, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 12.7, "note_globale": 6.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 110}, {"prenom_nom": "Apolline FAVRIS", "fonction": "acheteuse approvisionneuse", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 4.5, "d2_total": 1.5, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.5, "d3_display": 0.0, "note_sur_20": 12.7, "note_globale": 6.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 111}, {"prenom_nom": "Virginie COTEREAU", "fonction": "Analyste Inventoriste", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 4.5, "d3_total": -0.5, "d1_display": 0.67, "d2_display": 1.5, "d3_display": -0.17, "note_sur_20": 12.7, "note_globale": 6.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 112}, {"prenom_nom": "saoussen Somai", "fonction": "DRH", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 4.5, "d2_total": 1.5, "d3_total": 0.0, "d1_display": 1.5, "d2_display": 0.5, "d3_display": 0.0, "note_sur_20": 12.7, "note_globale": 6.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 113}, {"prenom_nom": "Bacem BelMabrouk", "fonction": "Technicien Expertise Process", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 4.5, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 1.5, "d3_display": 0.0, "note_sur_20": 12.4, "note_globale": 5.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 114}, {"prenom_nom": "Jeroen Steegen", "fonction": "Test Engineer & Teamlead", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 115}, {"prenom_nom": "Cécilia NERET", "fonction": "Assistante ADV", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 116}, {"prenom_nom": "OMAR JENDOUBI", "fonction": "Technicien test et dépannage", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 117}, {"prenom_nom": "Linda Duchateau", "fonction": "teamlead warehouse", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 118}, {"prenom_nom": "JAMEL TAOUAI", "fonction": "RESPONSABLE MAINTENANCE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 119}, {"prenom_nom": "zahraa marzouki", "fonction": "PM", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 3.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 1.0, "d3_display": 0.0, "note_sur_20": 12.2, "note_globale": 5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 120}, {"prenom_nom": "230849000001539008", "fonction": null, "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 3.5, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 1.17, "d3_display": 0.0, "note_sur_20": 12.0, "note_globale": 4.5, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 121}, {"prenom_nom": "130849000001511040", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.83, "d3_display": 0.0, "note_sur_20": 12.0, "note_globale": 4.5, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 122}, {"prenom_nom": "Marie Luce Gouriou", "fonction": "Technicien qualité", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 123}, {"prenom_nom": "Ingrid Schepers", "fonction": "KAM", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 124}, {"prenom_nom": "Silvestro de Lucia", "fonction": "Commercial", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 125}, {"prenom_nom": "230849000001551040", "fonction": null, "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 126}, {"prenom_nom": "Alain LIGER", "fonction": "Chargé d'affaires", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 127}, {"prenom_nom": "Steeve MARDAGA", "fonction": "Technicien Industrialisation et Amélioration continue", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 128}, {"prenom_nom": "Heidi Bamps", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 129}, {"prenom_nom": "EMILIE HERBRECHT", "fonction": "Approvisinneuse", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 130}, {"prenom_nom": "Ghandi Ali", "fonction": "Repair Afdeling", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 131}, {"prenom_nom": "Guillaume Herter", "fonction": "Opérateur qualité et réception magasin", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 3.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 1.0, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 132}, {"prenom_nom": "Julien MELOU", "fonction": "KAM", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 133}, {"prenom_nom": "Christelle BELIER", "fonction": "Gestionnaire RH", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 134}, {"prenom_nom": "Kurt Schepers", "fonction": "Key accountmanager", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 135}, {"prenom_nom": "Ribeiro Márcia", "fonction": "Technicien de qualité - service de qualité", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.8, "note_globale": 4.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 136}, {"prenom_nom": "Jérémy HUAULME", "fonction": "Responsable Méthodes process", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 2.0, "d3_total": -0.5, "d1_display": 0.67, "d2_display": 0.67, "d3_display": -0.17, "note_sur_20": 11.6, "note_globale": 3.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 137}, {"prenom_nom": "Sandra Anastasi", "fonction": "Teamlead SMD", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 138}, {"prenom_nom": "Jessica Benoit", "fonction": "Chargée de gestion administrative, rh et adv", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 139}, {"prenom_nom": "Flavia Cerqueira", "fonction": "Planneur, Responsable logistique et Prod TRAD chez PT", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 140}, {"prenom_nom": "Pascal GERMAIN", "fonction": "Directeur", "departement": "Direction générale", "departement_code": "P1", "niveau": "Direction / Responsable stratégique", "niveau_code": "N1", "d1_total": 3.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 141}, {"prenom_nom": "CLAUDIA MAETZ", "fonction": "CS", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 142}, {"prenom_nom": "Aurore D", "fonction": "Technicienne Qualité", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 143}, {"prenom_nom": "KHALED GUESMI GUESMI", "fonction": "CHEF DE PROJET", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 1.0, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 144}, {"prenom_nom": "NIZAR BEN ZBIR", "fonction": "TECHNICIEN METHODES", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 0.0, "d3_total": -0.5, "d1_display": 1.0, "d2_display": 0.0, "d3_display": -0.17, "note_sur_20": 11.1, "note_globale": 2.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 145}, {"prenom_nom": "Mohamed Gsouma", "fonction": "technicien process CMS", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 10.9, "note_globale": 2.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 146}, {"prenom_nom": "Alison Marques da Silva", "fonction": "Assistante administrative", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 3.5, "d3_total": -2.5, "d1_display": 0.33, "d2_display": 1.17, "d3_display": -0.83, "note_sur_20": 10.9, "note_globale": 2.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 147}, {"prenom_nom": "ABDALLAH MELLITI", "fonction": "CST", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 3.5, "d2_total": 1.0, "d3_total": -2.5, "d1_display": 1.17, "d2_display": 0.33, "d3_display": -0.83, "note_sur_20": 10.9, "note_globale": 2.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 148}, {"prenom_nom": "Orlane Détouche", "fonction": "Responsable Logistique", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.5, "d2_total": -1.0, "d3_total": 0.0, "d1_display": 0.83, "d2_display": -0.33, "d3_display": 0.0, "note_sur_20": 10.7, "note_globale": 1.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 149}, {"prenom_nom": "guillaume le bel", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 1.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 10.4, "note_globale": 1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 150}, {"prenom_nom": "NAIMI SAHAR", "fonction": "FORMATRICE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": -1.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": -0.33, "d3_display": 0.0, "note_sur_20": 10.5, "note_globale": 1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 151}, {"prenom_nom": "ALEXANDRE LEVY", "fonction": "Technicien méthodes", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 10.4, "note_globale": 1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 152}, {"prenom_nom": "RIM CHIHI", "fonction": "RESP.UAP", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 2.0, "d2_total": -1.0, "d3_total": 0.0, "d1_display": 0.67, "d2_display": -0.33, "d3_display": 0.0, "note_sur_20": 10.5, "note_globale": 1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 153}, {"prenom_nom": "KÉVIN SCHNEIDER", "fonction": "RESPONSABLE SAAV", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 10.4, "note_globale": 1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 154}, {"prenom_nom": "Virginie Dulermez", "fonction": "Assistante de production", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": -1.0, "d3_total": -0.5, "d1_display": 0.67, "d2_display": -0.33, "d3_display": -0.17, "note_sur_20": 10.2, "note_globale": 0.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 155}, {"prenom_nom": "Halima HAFFAR", "fonction": "Technicienne méthodes", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 3.0, "d2_total": 0.0, "d3_total": -2.5, "d1_display": 1.0, "d2_display": 0.0, "d3_display": -0.83, "note_sur_20": 10.2, "note_globale": 0.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 156}, {"prenom_nom": "NADEGE SALVAN", "fonction": "Customer service", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": -1.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": -0.5, "d3_display": 0.0, "note_sur_20": 10.2, "note_globale": 0.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 157}, {"prenom_nom": "Nicolas Cudelou", "fonction": "Technicien Méthodes", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": -1.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -0.33, "d3_display": 0.0, "note_sur_20": 10.0, "note_globale": 0.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 158}, {"prenom_nom": "230849000001537120", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": 0.0, "d3_total": -2.5, "d1_display": 0.67, "d2_display": 0.0, "d3_display": -0.83, "note_sur_20": 9.8, "note_globale": -0.5, "categorie": "Enthousiaste", "is_anonymous": true, "rang": 159}, {"prenom_nom": "SONIA PECULIER", "fonction": "RESPONSABLE COMPTABLE", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 2.0, "d2_total": -2.5, "d3_total": 0.0, "d1_display": 0.67, "d2_display": -0.83, "d3_display": 0.0, "note_sur_20": 9.8, "note_globale": -0.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 160}, {"prenom_nom": "Corinne CHALUMEAU", "fonction": "ASSISTANTE ADV", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": -2.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -0.67, "d3_display": 0.0, "note_sur_20": 9.5, "note_globale": -1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 161}, {"prenom_nom": "Florian COLLEAUX", "fonction": "Technicien Test et Dépannage", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": -2.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -0.67, "d3_display": 0.0, "note_sur_20": 9.5, "note_globale": -1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 162}, {"prenom_nom": "Cristiana Costa", "fonction": "Team Leader", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 1.0, "d2_total": -2.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -0.67, "d3_display": 0.0, "note_sur_20": 9.5, "note_globale": -1.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 163}, {"prenom_nom": "Laetitia LECOINTRE", "fonction": "Technicienne ordonnancement", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 1.0, "d2_total": -2.5, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -0.83, "d3_display": 0.0, "note_sur_20": 9.3, "note_globale": -1.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 164}, {"prenom_nom": "Sami Agrebi", "fonction": "Responsable Magasin", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 1.0, "d2_total": -3.5, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -1.17, "d3_display": 0.0, "note_sur_20": 8.9, "note_globale": -2.5, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 165}, {"prenom_nom": "Jerome THOMAS", "fonction": "Responsable Achats", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 1.0, "d2_total": -6.0, "d3_total": 0.0, "d1_display": 0.33, "d2_display": -2.0, "d3_display": 0.0, "note_sur_20": 7.8, "note_globale": -5.0, "categorie": "Enthousiaste", "is_anonymous": false, "rang": 166}, {"prenom_nom": "Pieter Coenegrachts", "fonction": "Warehouse Operator", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": 7.5, "d3_total": -0.5, "d1_display": 0.0, "d2_display": 2.5, "d3_display": -0.17, "note_sur_20": 13.1, "note_globale": 7.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 167}, {"prenom_nom": "Hardy D", "fonction": "Test & Assembly manager", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 0.0, "d2_total": 1.0, "d3_total": 2.5, "d1_display": 0.0, "d2_display": 0.33, "d3_display": 0.83, "note_sur_20": 11.5, "note_globale": 3.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 168}, {"prenom_nom": "Thomas BOUET", "fonction": "Développeur Fullstack", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": 3.0, "d3_total": 0.0, "d1_display": 0.0, "d2_display": 1.0, "d3_display": 0.0, "note_sur_20": 11.3, "note_globale": 3.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 169}, {"prenom_nom": "François Walter", "fonction": "Réception magasin", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": 2.0, "d3_total": -0.5, "d1_display": 0.0, "d2_display": 0.67, "d3_display": -0.17, "note_sur_20": 10.7, "note_globale": 1.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 170}, {"prenom_nom": "Eugénie LUCAS", "fonction": "Assistante Achat", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": 2.0, "d3_total": -0.5, "d1_display": 0.0, "d2_display": 0.67, "d3_display": -0.17, "note_sur_20": 10.7, "note_globale": 1.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 171}, {"prenom_nom": "230849000001510048", "fonction": null, "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 0.0, "d2_total": 1.0, "d3_total": 0.0, "d1_display": 0.0, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 10.4, "note_globale": 1.0, "categorie": "Méfiant", "is_anonymous": true, "rang": 172}, {"prenom_nom": "Fatima HEDDA", "fonction": "Assistante de direction", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -1.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": -0.33, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 10.5, "note_globale": 1.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 173}, {"prenom_nom": "Ivana Brucker", "fonction": "Assistante corporate", "departement": "Direction générale", "departement_code": "P1", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -1.0, "d2_total": 2.0, "d3_total": 0.0, "d1_display": -0.33, "d2_display": 0.67, "d3_display": 0.0, "note_sur_20": 10.5, "note_globale": 1.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 174}, {"prenom_nom": "Ismail Gursoy", "fonction": "KEY ACCOUNT MANAGER", "departement": "Relation client", "departement_code": "P2", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": -1.0, "d2_total": 0.0, "d3_total": 1.5, "d1_display": -0.33, "d2_display": 0.0, "d3_display": 0.5, "note_sur_20": 10.2, "note_globale": 0.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 175}, {"prenom_nom": "Céline ENGEL", "fonction": "Team Leader réception magasin", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": -1.0, "d2_total": 0.0, "d3_total": 1.0, "d1_display": -0.33, "d2_display": 0.0, "d3_display": 0.33, "note_sur_20": 10.0, "note_globale": 0.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 176}, {"prenom_nom": "Roy Leenders", "fonction": "Teamleader", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 0.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": 0.0, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 10.0, "note_globale": 0.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 177}, {"prenom_nom": "Anthony Gruckert", "fonction": "Ingénieur Systèmes Embarqués", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": -0.5, "d2_total": 0.0, "d3_total": 0.0, "d1_display": -0.17, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 9.8, "note_globale": -0.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 178}, {"prenom_nom": "Virginie GAUFFRE", "fonction": "Technicienne qualité", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -1.0, "d3_total": 0.0, "d1_display": 0.0, "d2_display": -0.33, "d3_display": 0.0, "note_sur_20": 9.6, "note_globale": -1.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 179}, {"prenom_nom": "Patrice RENAULT", "fonction": "Technicien", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": 1.0, "d3_total": -2.5, "d1_display": 0.0, "d2_display": 0.33, "d3_display": -0.83, "note_sur_20": 9.3, "note_globale": -1.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 180}, {"prenom_nom": "Carine FOURMOND", "fonction": "ADV", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -2.5, "d2_total": 1.0, "d3_total": 0.0, "d1_display": -0.83, "d2_display": 0.33, "d3_display": 0.0, "note_sur_20": 9.3, "note_globale": -1.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 181}, {"prenom_nom": "Séverine KRAEHER", "fonction": "OFFICE MANAGER et ASSITANTE COMPTABLE", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -1.5, "d3_total": 0.0, "d1_display": 0.0, "d2_display": -0.5, "d3_display": 0.0, "note_sur_20": 9.3, "note_globale": -1.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 182}, {"prenom_nom": "Ala dain Becha", "fonction": "technien de chiffrage", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -2.0, "d2_total": -1.0, "d3_total": 1.5, "d1_display": -0.67, "d2_display": -0.33, "d3_display": 0.5, "note_sur_20": 9.3, "note_globale": -1.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 183}, {"prenom_nom": "FLORENCE MARIE", "fonction": "TECHNICIENNE METHODES", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -2.0, "d2_total": 0.0, "d3_total": 0.0, "d1_display": -0.67, "d2_display": 0.0, "d3_display": 0.0, "note_sur_20": 9.1, "note_globale": -2.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 184}, {"prenom_nom": "GUILLAUME GABINO", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -2.0, "d3_total": 0.0, "d1_display": 0.0, "d2_display": -0.67, "d3_display": 0.0, "note_sur_20": 9.1, "note_globale": -2.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 185}, {"prenom_nom": "Fabienne GARRY", "fonction": "Responsable comptable et financier", "departement": "Comptabilité, Administration", "departement_code": "P4", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": 0.0, "d2_total": -1.5, "d3_total": -0.5, "d1_display": 0.0, "d2_display": -0.5, "d3_display": -0.17, "note_sur_20": 9.1, "note_globale": -2.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 186}, {"prenom_nom": "BLANDINE LECLERC", "fonction": "Assistant Achats", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": 0.0, "d3_total": -2.5, "d1_display": 0.0, "d2_display": 0.0, "d3_display": -0.83, "note_sur_20": 8.9, "note_globale": -2.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 187}, {"prenom_nom": "Vivien Nguyen", "fonction": "Technicien test et dépannage", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -1.0, "d2_total": 0.0, "d3_total": -2.5, "d1_display": -0.33, "d2_display": 0.0, "d3_display": -0.83, "note_sur_20": 8.5, "note_globale": -3.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 188}, {"prenom_nom": "Rui Cunha", "fonction": "Service Méthodes et Industrialisation", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -3.5, "d3_total": 0.0, "d1_display": 0.0, "d2_display": -1.17, "d3_display": 0.0, "note_sur_20": 8.4, "note_globale": -3.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 189}, {"prenom_nom": "FREDERIC VIOT", "fonction": "DEVISEUR", "departement": "Relation client", "departement_code": "P2", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -4.5, "d3_total": 0.0, "d1_display": 0.0, "d2_display": -1.5, "d3_display": 0.0, "note_sur_20": 8.0, "note_globale": -4.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 190}, {"prenom_nom": "ESTELLE AUBRY", "fonction": "MONITRICE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -4.5, "d3_total": 0.0, "d1_display": 0.0, "d2_display": -1.5, "d3_display": 0.0, "note_sur_20": 8.0, "note_globale": -4.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 191}, {"prenom_nom": "David TOUSSAINT", "fonction": "Responsable des opération de production", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": -1.0, "d2_total": -1.5, "d3_total": -2.5, "d1_display": -0.33, "d2_display": -0.5, "d3_display": -0.83, "note_sur_20": 7.8, "note_globale": -5.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 192}, {"prenom_nom": "ISABELLE BLOT", "fonction": "MONITRICE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -1.0, "d2_total": -4.5, "d3_total": 0.0, "d1_display": -0.33, "d2_display": -1.5, "d3_display": 0.0, "note_sur_20": 7.6, "note_globale": -5.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 193}, {"prenom_nom": "Antonio Silva", "fonction": "Chefe de equipa", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": -3.5, "d2_total": -3.5, "d3_total": 0.0, "d1_display": -1.17, "d2_display": -1.17, "d3_display": 0.0, "note_sur_20": 6.9, "note_globale": -7.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 194}, {"prenom_nom": "CAROLE FILOCHE", "fonction": "VENTILATION", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -4.5, "d3_total": -2.5, "d1_display": 0.0, "d2_display": -1.5, "d3_display": -0.83, "note_sur_20": 6.9, "note_globale": -7.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 195}, {"prenom_nom": "130849000001535104", "fonction": null, "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -5.0, "d3_total": -2.5, "d1_display": 0.0, "d2_display": -1.67, "d3_display": -0.83, "note_sur_20": 6.7, "note_globale": -7.5, "categorie": "Méfiant", "is_anonymous": true, "rang": 196}, {"prenom_nom": "Nadège BROCHELARD", "fonction": "Magasinier", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -5.0, "d3_total": -2.5, "d1_display": 0.0, "d2_display": -1.67, "d3_display": -0.83, "note_sur_20": 6.7, "note_globale": -7.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 197}, {"prenom_nom": "hedia saadi", "fonction": "depanneuse", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": 0.0, "d2_total": -7.5, "d3_total": -0.5, "d1_display": 0.0, "d2_display": -2.5, "d3_display": -0.17, "note_sur_20": 6.4, "note_globale": -8.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 198}, {"prenom_nom": "Béatrice DESNOE", "fonction": "Technicienne Méthodes (partie codification)", "departement": "R&D, Innovation", "departement_code": "P5", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -2.0, "d2_total": -3.5, "d3_total": -2.5, "d1_display": -0.67, "d2_display": -1.17, "d3_display": -0.83, "note_sur_20": 6.4, "note_globale": -8.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 199}, {"prenom_nom": "Marion GOULLET de RUGY", "fonction": "Technicienne planification ordonnancement", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -1.0, "d2_total": -5.0, "d3_total": -2.5, "d1_display": -0.33, "d2_display": -1.67, "d3_display": -0.83, "note_sur_20": 6.2, "note_globale": -8.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 200}, {"prenom_nom": "Pauline GIRARD", "fonction": "Responsable HSE", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Cadre / Manager", "niveau_code": "N2", "d1_total": -2.5, "d2_total": -4.5, "d3_total": -2.5, "d1_display": -0.83, "d2_display": -1.5, "d3_display": -0.83, "note_sur_20": 5.8, "note_globale": -9.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 201}, {"prenom_nom": "Charlotte Beaudoin", "fonction": "Gestionnaire logistique", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -2.0, "d2_total": -7.5, "d3_total": -2.5, "d1_display": -0.67, "d2_display": -2.5, "d3_display": -0.83, "note_sur_20": 4.7, "note_globale": -12.0, "categorie": "Méfiant", "is_anonymous": false, "rang": 202}, {"prenom_nom": "PATRICIA CHAMPION", "fonction": "CONTROLE FINAL INTEGRATION", "departement": "Production, RH, Logistique", "departement_code": "P3", "niveau": "Employé / Technicien", "niveau_code": "N3", "d1_total": -3.5, "d2_total": -7.5, "d3_total": -2.5, "d1_display": -1.17, "d2_display": -2.5, "d3_display": -0.83, "note_sur_20": 4.0, "note_globale": -13.5, "categorie": "Méfiant", "is_anonymous": false, "rang": 203}];
+const verbatims = ["IA déjà utilisée lors du développement logiciel, questions rapides sur l'électronique\nIA déjà intégrée dans les logiciels finaux (ERPKitting) pour faire des traitements qui sont fastidieux à faire pour l'utilisateur, mais rapide pour l'IA.\nUtilisation pour faire des résumés d'emails.\nIl y a encore beaucoup à faire sur l'IA à la fois en tant qu'utilisateur direct, mais aussi en tant qu'intégrateur dans les logiciels du groupe.", "Tout personne ayant besoin de condenser, traiter, reformatter des informations peut utiliser l'IA ; je pense que c'est le cas pour beaucoup de personnes de l'entreprise.\nCependant :\n- il faut rester capable de faire les mêmes traitement manuellement. L'IA doit toujours pouvoir être \"débranchable\" et ne pas être dans un chemin critique\n- il y a un risque à envoyer des données aux IAs non-EU, cela peut être contraire aux exigences client.", "Gestion des AR fournisseur\nDashboard achat group (OTD, CA, évolution...etc)\nAnalyse performance fournisseur\nOptimisation supply chain", "Supply chain (relance fournisseur, analyse manquants)\nChiffrage (BOM + main d'oeuvre)\nNégociation annuelle achat\nAnalyse des nomenclatures clients, gestion des équivalences\nSuivi des prix de vente et des marges\nTraitements factures (écarts facturation)\nCodification", "Générer des documents d'expression de besoin métier, de spécification fonctionnelles et des plan de tests \nRésumer une réunion de travail\nConstruire des \"ordinogrammes\"", "L'IA peut m'aider à trouver des HS code pour la douane  plus facilement\nJe l'utilise également pour la conversation de l'heure en format numérique\nCe sont des fonctions toutes simples.", "Claude Code pour les développeurs (déjà en oeuvre). Adoption sur un périmètre plus large : branchement aux tickets, revues de code, etc ..", "Remplacement de PowerBI par une solution plus adaptée aux besoins d'analyse et de reporting. Création d'artefacts partagés sur Claude transformés en rapport pérenne.", "Ajout de fonctionnalités aux outils développés en interne : Analyse de dossier client avec classification des documents automatiques, analyse des défauts du Gerber", "Remplacement d'outils SaaS couteux et souvent trop complexes par des outils plus adaptés au besoin et mieux intégrés.", "Aide à la préparation des clôtures mensuelles pour la compta : préparation des checklist, analyse des différences de CA entre ERP comptable et ERP métier.", "Automatisation des recoupements à partir des PDF nécessitant plus qu'un simple OCR (Commande, AR fournisseurs, factures)", "Analyse des productions réalisées : analyse en temps réel des écarts, collecte et analyse des données de test.", "Questions en langage naturel sur les informations disponibles en transverse sur un client, une commande, un OF, un article, etc ...", "Aider la prospection commerciale pour qu'elle soit plus ciblée et pertinente, détecter les sociétés avec des projets porteurs, anticiper le plus amont leur besoin pour être les premiers en se servant des contacts Proto", "Améliorer les outils et éviter les mêmes saisies dans plusieurs outils. Faire communiquer les outils ensembles", "Améliorer les comptes rendu de visite pour être plus pertinent et faire gagner du temps aux commerciaux", "Mettre en place des relances en automatique vers les prospects ou leur pousser des informations tout en restant humaine", "Suivi des marges sur les produits chez tous les clients en fonction des prix d'achat des composants.", "Mettre en place un 360° sur chaque client : CA, marge, stocks, santé financière du client, retard de paiement, etc....", "- Gestion de la polyvalence & proposition des plans de charges pour le management de proximité \n- GMAO avec maintenance prédictive \n- Ordonnancement via IA", "1- Automatisation des rapports techniques : développer un outil qui génère automatiquement des rapports à partir des résultats des tests et des mesures\n2- Maintenance prédictive : détecter les anomalies des équipements et anticiper les pannes avant qu’elles ne surviennent.", "Evolution des dossiers de fabrication, aide à l'intervention des moyens test, automatisation de changement des interfaces de  test", "1. L'IA qui analyse et classe les mails automatiquement. (les copies a part, les annonces d'Altrics (comme les infos de la RH ou évènements) dans une autre rubrique et les réponses de mail ou on attend la réponse en priorité, ça évitera de se perdre dans les mails et de chercher ce qu'on cherche + rapidement.\n\n2. Transformer automatiquement les documents en informations, par exemple si on reçoit un BL en PDF, l'IA extrait, le BL, le fournisseur, le numéro de commande, et la quantité.", "- Remplacement progressif de BI\n- Aide au process de clotures mensuelles\n- Déléguer à l'IA des tâches répétitives et redondantes sans valeur ajoutée", "- Rapprochement A/R fournisseurs et commandes\n- Contrôle des factures fournisseurs vs commandes livrées", "1/ Croiser les données telles que : l’état des composants, les matières et  finition des PCB, les profils , les chocs thermiques, les conditions hygrométriques, et d’autres paramètres . Pour identifier des corrélations et de définir quelques solutions standardisées pour traiter un défaut en tête du de Pareto.\n2/ Croiser les motifs de panne issus de la GMAO et des autres sources de données afin d’identifier les corrélations et de proposer des actions correctives basées sur le  (RETEX).", "1/ Optimiser les flux de transit afin d'améliorer les délais, la fluidité des opérations et la performance globale.\n\n2/ Identifier les opportunités d'achat et anticiper le meilleur moment pour sécuriser la disponibilité des produits aux conditions de prix les plus avantageuses.\n\n3/ Sélectionner les profils les plus adaptés lors des recrutements en fonction des besoins actuels et futurs de l'entreprise..", "Je pense que l’IA peut surtout aider à automatiser les tâches répétitives et administratives qui prennent du temps. Cela permettrait aux employés de se concentrer sur des activités plus productives, stimulantes et à plus forte valeur ajoutée. Loin de menacer l’emploi, l’IA peut le valoriser. De nombreuses erreurs humaines sont liées à la routine et à la répétition de tâches peu intellectuelles, que l’IA est aujourd’hui capable d’assumer efficacement.", "Contrathèque groupe mise à jour en continu via base partagée\nAlertes réglementaires et légales ciblées\nRevues de contrôle interne via outils métiers", "Agent IA d'analyse 8D :\n- LLM avec appel d'outils , orchestrant des fonctions SQL et des scripts Python \n- RAG base vectorielle sur 8D histroiques, procédures et normes\n- Intégration un module 8D avec état d'avancemet et indicateurs\n- indicateurs de réussite \n- intégration à la supervision et déploiement progressif", "Optimisation et automatisation du Backlog des commandes fournisseurs. Gain de temps et fiabilité assurés.", "Obtenir une procédure permettant aux collaborateurs de savoir pourquoi l'on fait les choses. Arrêter de remplir les cases sans savoir qui en a besoin et comment les améliorer pour fluidifier les processus.\nComment rendre un intérêt à ce que l'on fait!\nNe pas penser qu'à soit!\nHarmoniser les flux de production\nSéréniser les activités pour améliorer les tensions entre service.\nRéaliser des indicateurs pas service en instantané", "Etats d'avancement des recherches en recrutement RH par exemple\nEtat du CA et marge en direct\nEvolution des charges de l'entreprise en directe", "En tant que méthodiste, on peut l(utiliser pour:\n- Analyser les dossier indus (AQP-FQ)\n- La création et la MAJ des dossiers techniques (Fiches d'instructions) \n- Analyser les modification des produits (notamment pour la comparaison des BOMs) et les NPI et pk pas pour l'injection ERP\n- Analyse des non-conformités et des problèmes de production\n- Mettre en place un tableau de bord intelligent pour les suivis de traitement de modifs (clôturés/en attente/encours) à diffuser chaque semaine à la prod", "Oui, j’ai déjà plusieurs idées. En tant que conseiller en prévention, l’IA est un outil très utile qui me fait gagner énormément de temps, notamment pour identifier les produits chimiques, documenter les informations relatives à ceux-ci et détecter ou corriger les risques potentiels. Elle m’aide également dans mes tâches de maintenance pour trouver les méthodes de travail les plus rapides et les plus efficaces. Je l’utilise déjà très régulièrement.", "Planification de production et gestion de la qualité\nUne planification de production précise et dynamique, tenant compte du statut des articles critiques, notamment s’ils ont été commandés et s’ils ont effectivement été livrés.\n\nEn adaptant continuellement le planning en temps réel, nous disposerons d’une vision réaliste de la situation et de l’avancement de la production.\n\n\n.", "Cela nous permettra de planifier jusqu’à deux semaines à l’avance et d’établir une planification des capacités plus précise.\nPar ailleurs, il devra être possible d’enregistrer les problèmes de qualité et les retours d’information, afin que ceux-ci soient automatiquement transmis aux départements concernés et que des actions d’amélioration ciblées puissent être mises en place", "Veille et tracking automatique de cibles\nAnalyse fondamentale poussée à partir de documents reçus\nModélisations excel poussées", "Faciliter / automatiser le process de traitement opérationnel établi par les KAM et d'une manière générale par l'équipe CFT.", "D'une manière générale : automatiser certains process opérationnels (ex : gestion des obsolescences versus recherche d'équivalences, ...)", "Refonte des dashboards sociétés (remplacement des PBI) et partage plus large.\nSimplification des process et suppression des taches répétitives avec des skills/compétences\nAutomatisation des taches.", "Al gelanceerd, ik heb AI een python programma laten schrijven (Visual Studio Code) om de BOM-lijsten van de klanten om te zetten naar een generiek BOM-lijst en automatisch opzoekt in Ridder om zo al de ACE-JTC artikkel al te vinden idien aanwezig.", "DFM (design for manufactory) laten controleren door AI. AI inschakelen om alternatieve componenten te vinden. AI inschakelen om een mooie klantenportaal te ontwikkelen waaral DFM inzit. Waaral de BOM-lijstcontrole enz automatisch wordt gedaan door AI.", "À la suite de la réunion du comité du groupe du 16/10/2025, j’ai transmis à Álvaro Costa ma vision stratégique du potentiel de l’IA pour résoudre les problèmes actuels et préparer l’avenir de l’entreprise. Les propositions, élaborées avec l’aide de l’IA, sont détaillées dans l’e-mail original, que je vous invite à consulter. Certains sujets ont depuis été développés, tandis que d’autres restent des opportunités à explorer.", "Je vous invite à consulter l’e-mail original. \n\nSujet : IA Cadre stratégique\n\n*L’IA comme moteur d’efficacité et d’innovation chez Altrics PT et au sein du groupe\n*Comment l’IA peut soutenir notre travail aujourd’hui et préparer un avenir rentable et durable\n*Les risques liés à l’IA et la dépendance à son égard", "Mettre en place un outil d'IA pour anticiper les ruptures matière et évaluer l'impact des retards fournisseurs en temps réel. Le système permettra de simuler rapidement des scénarios alternatifs de planification (réajustement des ordres de fabrication) sans attendre un CBN, afin de sécuriser la production et de garantir les délais de livraison clients.", "Dans notre atelier CMS  l’IA peut nous aider à automatiser certaines tâches.\n-Utiliser l’IA pour analyser les résultats de la machine SPI et corriger automatiquement les dérives de sérigraphie sans intervention humaine\n-Utiliser l’IA pour réduire les faux défauts détectés par la machine AOI pour minimiser l’intervention des contrôleurs pour vérifier et valider les défauts", "--> Structuration des idées avec complémentation linguistique (outil linguistique)\n--> Calculs des coûts optimisés pour la mise en œuvre des solutions retenues dans le cadre de l'amélioration continue (outil mathématique)", "--> Optimisation des stocks de composants en fonction du prévisionnel des opérations de production\n--> Optimisation des commandes de composants avec prise en charge des facteurs critiques liés à nos productions\n--> Aide à la planification des opérations de production avec optimisation de la réactivité face aux impondérables", "Traitement des emails par priorité\nGestion des paiement fournisseurs\ntraitement d'une boite au lettre pour gérer le mail de commande et interfacer avec la base de dnnées NINOX", "1/Des comptes rendu de réunion clients ou fournisseurs synthétiques et structurés.\n2/Des notification d'actions aux différents responsables à relancer pour mise à jour de plans d'actions.\n2/Formaliser des PPAP projets sur une base commune et simple à rédiger, à synthétiser et communiquer\n3/Synthèse d'indicateurs de performances à tous les niveaux pour préparation de Bisness review clients\n...", "Tableau de bord de pilotage de Proto et Edgeflex en temps réel avec graphiques et alertes sur les différents indicateur", "AI kan als hulp gebuikt worden om controles uit te voeren op dossiers, maar men moet steeds alert blijven en zorgen dat je de controle niet verliest. Blijf zelf de beslissende factor.", "M'aider à détailler des factures de transport et me générer les écritures au format d'import automatiquement.", "Vérifier dans Sage la comptabilité pour trouver des anomalies, doublon de facture, incohérences et mettre en avant les points à surveiller.", "Mieux calibrer les informations à transmettre dans la DEB en utilisant les informations des réceptions dans Excalibur, aujourd'hui l'information transmise n'est pas fiable et nécessite beaucoup de retraitement.", "M'aider a faire la TVA en identifiant rapidement la TVA sur les factures à l'encaissement en croisant les informations dans Sage.", "Mieux répartir les coûts de transport et les frais de douane par client et fournisseurs. Connaître mieux les impacts pour chaque fournisseurs de la logistique et de fiscalité pour améliorer la qualité des  informations quant au coût d'acquisition des matières premières.", "L'IA me fait gagner beaucoup de temps sur la rédaction de mes mails et rapports. Elle m'aide aussi à expliquer simplement des phénomènes techniques complexes. Mes fonctions ont évolué, je ne fais plus principalement de la réparation, je dois aussi expliquer et rendre compte clairement de ce qui a été fait", "En dehors de mes fonctions, je pense que l'IA pourrait être intéressante pour faciliter la recherche et la traçabilité des cartes. Si elle était connectée aux bases de données Répa, Excalibur et Board Tracker, elle pourrait permettre de retrouver rapidement la localisation d'une carte, son historique et les différentes étapes de son parcours. Cela permettrait de gagner du temps dans les recherches et d'avoir une meilleure visibilité sur le suivi des cartes.", "Possibilité d'analyser lees dossiers clients avants qu'ils passent commande afin d'alerter le client en amont.", "Utiliser l'IA pour optimiser le code des anciens rapports Power BI, améliorer la visualisation des rapports bi", "Assitant organisation, redaction de document répétitif. Aide au codage d'outils métier. Verification de données statistiques, données techniques.", "- Make a calibration reminder tool\n- Make a tool to enhance the ERP with more information about electronic components (lead times, stock levels)\n- Make a tool to enhance the ERP with implementing a better BOM management, current ERP is very 'simple', it is just a BOM, but it needs more features (what MPN's are allowed by each customer on which reference, alternatives, which different item codes can be used, approved vendor or other source allowed by the customer)", "- AOI can be enhanced with AI, which would reduce false call rate and help the operator with alerting about wrong classifications", "- Order guidance and life error searching\n- planning analysis\n- Programming help for tools\n- Item analysis", "1-Développer une application IA pour capitaliser et exploiter les Lessons Learned de notre activité.\n2-Créer une application regroupant les prompts IA adaptés à chaque cas d’usage et type d’analyse.", "Développer, avec l’assistance de l’IA, un projet pluridisciplinaire de migration progressive vers l’Industrie 4.0, structuré en plusieurs étapes et nécessitant des investissements, afin de mettre en place l’enregistrement et la traçabilité en temps réel de chaque étape, chaque poste et chaque produit.", "- Outil de centralisation (PO/OF/Statut de l'OF, avancement dans la gamme / NQ / ...) en mergant ERP / Base Répa / BoardTracker ... \n- Amélioration des outils existants via Claude Cause (ex : Boardtracker & BaseRépa)\n- Résumé / Rationalisation / classification & préparation de l'ensemble des mails et réunion (+30/ jours et a minima 4 réunion par jour (routine hebdo)\n- Outil pilotage program & lancement (Phase DT & MPV (révision & manufacturing) qui est alimenté et accessible pour visu global.", "Saisie & contrôle automatique des PO (prix / AR/ planification/ appros) \nActualisation / Conseil des révisions des devis produit (MO & Matière) via consultation automatique des prix fournisseurs et via les fiches d'instructions et gamme saisie dans l'ERP et renseignées sur serveur. \n(Bcp de solutions, plus ou moins rentable / efficiente / sûre / simple à mettre en place → tps de réflexion)\n/!\\ Il doit être un outil pour créer un outil (les prompts ne sont pas toujours régulier en fiabilité)", "- Centralisation de l'ensemble des outils de reporting : \n-> Automatisation de l'ensemble des rapports financiers de fin de mois\n-> Centralisation des données de forecast, versioning des données et possibilité d'automatiser les comparaisons, les commentaires et les présentations : Board / Comex/ Etc\n-> automatisation des relances clients centralement\n-> Détections automatique des anomalies (stock / Master data / etc....", "Automatiser les process de réception et de validation des outillages pour garantir la complétude documentaire\nAutomatiser la recherche des incohérences dans les données de travail (entre CdC et schéma par exemple)\nGénérer une préanalyse des dossiers (dimensions utiles, nb points d'accès, etc.)\nAméliorer les matrices de chiffrage par traitement des coûts des réalisations précédentes\nCréer une base de données projet pour mieux capitaliser les solutions déjà expérimentées sur de nouveaux dossiers", "Recherche juridique, Proposition de trame d'accord juridique , de fiche de poste , analyse de data ,", "Optimisation et aide dans l'analyse d'e-mails,  gestion des sujets, check list de suivi des points clôturés, avancement. saisi de non-conformités, suivi des indicateus de processus, etc.", "Gestion des PCN:\nTrie des mails des fournisseurs pour déterminer l'action à réaliser.\nRédiger les mails d'information à envoyer aux clients (traitement des obsolescences).\nRelancer automatiquement les mails restés sans retour après un certain temps.\nCodification:\nRetranscrire les différents formats de BOM client dans un tableau modèle prêt à être injecter dans l'ERP. Notre travail serait de vérifier et compléter les données manquantes.\nPointer la BOM ERP et indiquer les écarts avec la BOM client", "1 - Assistant de recherche et exploitation pour SMQ 3A + normes (ISO, IPC) dans un cadre sécurisé business unit\n2 - Outil d'analyse d'émail pour rechercher et synthétiser des historiques dans un cadre sécurisé au niveau du poste\n3 - Solution de traduction automatique vers le portugais (pour le site de Braga) et l'anglais (lors de communication avec nos fournisseurs)\n4 - Système de veille (normative, réglementaire et technologique) pour anticiper les exigences de notre secteur.", "Exploitation automatique des données déjà au serveurs et au PC pour répondre efficacement et rapidement aux RFI des futures client", "A partir des connecteurs avec les ERP, simplifier les extractions et utiliser l'IA pour faire une synthèse avec des propositions d'actions", "Croisement de fichiers et mise en place de synthèse pour l'aide à la décision (évolution de prévisions clients avant implémentation des les ERP)", "Préparer des présentations interne et externe de manière beaucoup plus rapide avec l'utilisation de données issues des bases de données", "1-Utiliser l'IA pour automatiser la préparation et la mise a jour des documents techniques pour gagner du temps et réduire les erreurs\n2-Utiliser l'IA pour détecter les donnés manquantes et les erreurs entre techniques", "Assistant IA pour analyser les dossiers techniques clients (BOM, plans, Gerber, évolutions) et détecter les changements ou points de vigilance.\nRecherche intelligente dans procédures, standards et retours d’expérience.\nAnalyse des données production/qualité pour repérer anomalies et tendances.\nGénération assistée de documents techniques, instructions, synthèses et traductions, avec validation humaine.", "Achats/Supply Chain : anticipation des risques de rupture, analyse des délais fournisseurs et détection des écarts de prix.\nCommerce : assistance à l’analyse des RFQ et comparaison avec les historiques de chiffrage.\nRH/Formation : assistant interne pour l’onboarding, la formation et l’accès aux procédures, en plusieurs langues.\nManagement : synthèse automatique des principaux KPI et alertes sur les écarts nécessitant une action.", "sortie des KPI en automatique\nperformance sur le suivi des éléments ERP\nautomatisation des points clés réunion", "Planning CMS automatisé développé avec l'IA (Claude) : application web qui remplace l'Excel de planification des lignes SMT. Les opérateurs enregistrent temps de changement de série, montage, validation 1ère carte, début/fin de production, arrêts et défauts par équipe. Calcul en direct de l'OE, OEE, PPM, capacité libre et retard de la semaine, avec version hors ligne pour les postes sans réseau.", "Suivi du lancement de nouveaux produits (NPI) avec l'IA : outil qui centralise les étapes de lancement (réception des données client, programmes, stencils, premières séries, validation), contrôle automatiquement la cohérence des documents (nomenclature, Gerber, versions) et alerte sur les points bloquants. Objectif : réduire le temps de lancement et éviter les erreurs de version.", "Application de validation des stencils développée avec l'IA : enregistrement de la réception et du contrôle de chaque stencil (référence, version, épaisseur, état, tension, nettoyage), comparaison avec les données du produit et historique d'utilisation. Alerte en cas de mauvaise version ou d'usure, pour garantir la qualité de la sérigraphie et la traçabilité.", "Digitaliser d'autres processus encore sur Excel ou papier avec la même approche : contrôle final, suivi de maintenance préventive, traçabilité des lots et instructions de travail. L'IA permet de créer rapidement des outils sur mesure, sans développement informatique lourd, et d'analyser les données pour l'amélioration continue.", "1 - Créer le cahier des charges des clients avec les sections essentielles que le clients devra compléter.\n2 - Déterminer les Normes à passer (avant que l'on consulte un labo pour confirmer)\n3 - Vérification de la conformité aux normes\n4 - proposition de tests\n5 - Redaction des documents demandé par les labo de certification.\n6 - Developpement du code du test bench.", "-Automatisation du Flash CA, via une IA connectée directement aux différents ERP des filiales et fichiers budgétaires par client permettant d'avoir l'analyse des dérapages par client /pôle plus rapide \n-Automatisation les fichiers MD reports et calcul du DIO avec une IA capable d’analyser les tendances, faire les projections et anticiper les dérives.\n-Agent recouvrement: pour le suivi des overdues et relances à l'échelle du groupe\n-Agent Cash manager pour le suivi et projection du cash", "Agent IA creveau de l'entreprise: centraliser et connecter les connaissances, procédures et informations clés de toutes les filiales pour créer une mémoire intelligente partagée. Par exemple, si une filiale rencontre un litige avec un client, les autres entités travaillant avec ce client pourraient être alertées rapidement afin d’anticiper les risques, de mieux coordonner les actions.", "Aider à la planification de la production en proposant des priorités en fonction des urgences clients, des disponibilités composants et de la charge des ateliers.", "Aider le service qualité à analyser les non-conformités, les rejets... et identifier rapidement les causes récurrentes.", "-rédaction des fiches d'instruction de production.\n-mise en panel des PCB + fiche technique PCB.\n-rédaction des EI12 et RDE", "1-Vision prod par phase et état d'avancement +statue des cartes sans avoir a chercher ou questioner quelqu'un \n 2-Réaliser des taches journalière (routine) en simple clic\n 3-Etablir des indicateurs et des alertes qui faciliteront les prises de decisions et les axe de travail\n4-Réaliser des récap, un listing de choix sur les orientations a prendre pour des projet client complex ou meme simple", "je pense que l'IA peux être utiliser pour anticiper certain risques projets, prévision des charges de travail, détection des retards potentiels et aide à la prise de décision.", "Création d'une base de connaissances intelligente, avec toute les bonnes pratique qui peut Etre utiliser comme une base accessible au formation a la recherche d'info exc..", "Rendre le chiffrage, la consultation matière, les risques projet, les proposition commerciale rapide et fiable avec un reporting qui define des strategies ou scénario de fabrication rentable adapter au besoin client et au process usine.", "possible qu'a partir de la commande client , que l'IA peut aller cherché toute les informations necessaire lier a la faisabilité d'une commande client et proposer des dates d'AR qui seront derrière valider avec une vision instantané sur les rupture ou risque de rupture (stock matière reservé ou limité en quantité ou avec historique de rejet ou  peux utiliser  exc..) en liaison direct avec la fab et les problèmes en cours de fab et activer des Alertes.", "-développement d'outils métiers\n-déléguer des tâches répétitives\n-vérification générale\n-génération rapide d'états de l'art sur différents sujets", "-développement d'outils pour la GP en général\n-d'un point vu plus général, utiliser l'ia pour aider à créer des outils internes de toute sorte....", "1. Analyse des dépenses et optimisation des achats : Utilisation de l’IA pour analyser automatiquement les historiques d’achats, identifier les opportunités d’économies, les regroupements de commandes et les écarts de prix entre fournisseurs\n\n2. Prévision des besoins : Mise en place d’un outil d’IA permettant d’anticiper les consommations et les ruptures de stock à partir des historiques de commandes et des prévisions de production", "3. Comparaison automatique des offres fournisseurs : Utilisation de l’IA pour comparer les devis reçus (prix, délais, conditions de paiement) et faciliter la sélection du fournisseur le plus compétitif\n\n4. Automatisation administrative : Génération automatique d’e-mails, de comptes rendus de négociation et de synthèses de contrats afin de réduire le temps consacré aux tâches administratives", "Mise en place de KPI en lien avec les données ERP\nSurveillance des stocks morts avec indicateur à la clé\nSurveiller les sociétés pionnières dans un domaine d'activité précis en vue de les prospecter", "- Prévision des besoins : anticiper la demande et éviter les ruptures de stock ou le surstockage\n-Optimisation des stocks : analyser les niveaux de stock, \nAnalyse des fournisseurs : comparer automatiquement les prix, les délais de livraison et la qualité de service pour faciliter la prise de décision.\n-Automatisation du suivi des commandes : détecter les retards potentiels et générer des alertes pour anticiper les risques de rupture.", "mettre en place un assistant IA interne pour faciliter la recherche d’informations, automatiser les tâches répétitives et améliorer la communication entre les services, afin de gagner du temps et d’accroître la productivité.", "Un accompagnement dans le processus de recrutement. Une analyse de données de manière beaucoup plus aisée", "•\tAutomatiser la récupération des data et genrer des rapports / KPI en temps réel\n•\tEviter le saisi manuel des fiches suiveuses / rapport prod", "Les taches à non valeur ajoutées comme \n* Le contrôle qualité à la fin de process de prod \n* Comptage et suivi en prod, \n* Inventaire coté magasin", "Automatisation des réponses du support IT (chatbot) \nAnalyse de log pour être indépendant d'un SOC.\nAide a la supervision.", "- Accélération du développement des rapports et des tableaux de bord\n- Retravailler les rapports et les tableaux de bord existant esthétiquement", "Dans le cadre du S&OP, on a besoin de construire un PDP sur 12 mois. La plupart des clients nous donne peu de visibilité et l'IA pourrait construire le forecast sur base d'historique et marché + validation de la cohérence des forecasts clients. >Cela permettrait d'affiner le PDP et les approvisionnements", "répondre à ma place sur des emails pour indiquer que j'ai pris en compte la demande et faire de la prospection personnalisée téléphonique", "identique pour les KAM, les planneurs et les autres fonctions en autre les achats avec les fournisseurs", "Génération de visuels & contenus articles/posts RS\nOptimisation SEO et GEO\nAssainir la base CRM Hubspot\nVeille concurrentielle mensuelle et réception des articles les + intéressants et appréciés par notre cible", "S&OP hebdo direct de l'ERP avec une application \n KPI hebdo direct de l'ERP  avec une application \n  Transformations des metiers methode et appros et planif", "- Remplacer toutes les taches chronophages administratives\n- Comptes rendus\n- Traductions\n- Lecture et analyse des contrats", "Remplacer toutes les taches chronophages de saisies dans notre ERP\nPréparer les documents logistiques d'importations", "1 - Analyser les résultats des test ICT et FCT pour anticiper les défauts récurrents.\n2 - Faciliter le diagnostic des pannes grâce à l'analyse des históriques de test.\n3 -  Automatiseer l'analyse des indicateurs de performance et générer des alertes en cas d'anomalies.\n4 - Améliorer la traçabilité et l'exploitation des données techniques.", "1 - Mettre en place un systéme Andon intelligent pour gérer optimiser les demandes d'assistance et les temps de réponse.\n2 - Analyser les NC qualité pour identifier les causes récurrentes.\n3 - Exploiter les données de production pour anticiper les blocages et améliorer la planification.\n4 - Automatiser le traitement et la recherche d'informations dans la documentation technique.", "L’IA peut certainement contribuer à la création et à l’envoi de bons de commande aux fournisseurs, à l’analyse des confirmations de commande des fournisseurs, à l’envoi des confirmations de commande aux clients, à l’élaboration d’offres commerciales destinées aux clients, ainsi qu’à la comparaison et à la traduction de contrats et d’autres données.", "interprétation de données financières\nidentifications de cibles d'acquisition\nsuivi des projets\nsourcing/recrutement", "chiffrage matière\napprovisionnements\nachats\nanalyse de dossiers\ndéveloppement informatique\nmarketing dans modèles IA\ncontrôle de gestion\nbureautique", "Après chaque campagne FCT/ICT, j'exporte les logs du banc (CSV/TXT) et l'IA m'aide à regrouper les échecs par cause probable (composant ou fixture plutôt que cartes isolées), à détecter les dérives de mesure avant qu'elles atteignent les limites, à proposer un diagnostic à partir du code d'erreur, du point de test et de l'historique, puis à rédiger automatiquement les rapports de non-conformité (8D, rapport de lot) à partir des données brutes.", "Un « chronomètre intelligent » du poste de travail mesure le process, pas l'opérateur. Une caméra (ou un capteur) cadrée uniquement sur le poste, sans visage ni identification, détecte ses états : vide ou carte chargée, test en cours (LED du banc, écran, fixture fermée), déchargement, attente de matière, arrêt (panne, maintenance). Elle en déduit le temps de cycle réel, le taux d'occupation et la répartition des pertes, agrégés par poste.", "- Prévisions de trésorerie en collectant les infos des différents outils comptable ;\n- Détecter les erreurs dans le FEC ( double saisie, écriture déséquilibrée ... )\n- Contrôle clôture : transmettre la balance générale, le grand livre et l'IA pourra détecter les variations inhabituelles ou les écritures manquantes\n- Rapprochement automatique Sage / Kitting", "rédaction de documents simple (surtout coté mise en page). Rédaction de compte rendu de réunion (gain de temps et de valeur ajoutée)", "Tracking les cartes depuis sur les différents atelier\nCMS\nTHT\nIntégration \nSelon la gamme de produit biensur", "L'affectation des équipes je veux que l'affection des équipes par produit non par atelier afin de suivre un KPI très important est le TRG", "décortication de la bom\nfusionner des tableaux\nrechercher les type de boitier des composants\net ses datacheets...", "- Analyse des marchés potentiels\n- Recherche de nouveaux clients par rapport au clients existants tout en effectuant une analyse financière.\n- Optimisation des propositions commerciales\n- Analyse des prévisionnels clients et des commandes en cours par rapport aux années antérieures."];
+const analyseLlm = {"blocs_thematiques": [{"titre": "Pilotage par la donnée", "besoins": ["Tableaux de bord et KPI temps réel", "Remplacement / refonte de Power BI", "Clôtures, flash CA et forecast automatisés"], "mot_cle_strategique": "Visibilité", "categorie": "Y_productivite"}, {"titre": "Supply chain prédictive", "besoins": ["Anticipation des ruptures composants", "Optimisation des achats et des stocks", "Planification dynamique et S&OP"], "mot_cle_strategique": "Anticipation", "categorie": "Y_productivite"}, {"titre": "Excellence qualité et maintenance", "besoins": ["Analyse des tests ICT/FCT", "Réduction des faux défauts AOI/SPI", "Analyse des NC / 8D et maintenance prédictive"], "mot_cle_strategique": "Fiabilité", "categorie": "Y_productivite"}, {"titre": "Fin des doubles saisies", "besoins": ["Rapprochements commandes / AR / factures", "Contrôles comptables et fiscaux", "Conversion des BOM et applications métiers sur mesure"], "mot_cle_strategique": "Fluidité", "categorie": "Y_productivite"}, {"titre": "Mémoire collective du groupe", "besoins": ["Base de connaissances inter-filiales", "Gestion assistée des e-mails et comptes rendus", "Documentation technique et traductions"], "mot_cle_strategique": "Capitalisation", "categorie": "Y_productivite"}, {"titre": "Avant-vente augmentée", "besoins": ["Chiffrage et réponses RFQ/RFI", "Analyse DFM des dossiers clients", "Faisabilité et dates d'AR, suivi des marges"], "mot_cle_strategique": "Réactivité commerciale", "categorie": "X_relation_client"}, {"titre": "Conquête commerciale", "besoins": ["Prospection ciblée", "Vue client 360°", "Marketing digital et CRM"], "mot_cle_strategique": "Croissance", "categorie": "X_relation_client"}, {"titre": "Usine connectée et gouvernance IA", "besoins": ["Industrie 4.0 et traçabilité temps réel", "Cadre stratégique IA groupe", "Souveraineté et réversibilité des usages"], "mot_cle_strategique": "Transformation", "categorie": "Z_rd"}], "problematiques_profondes": ["La fragmentation des systèmes d'information entre filiales (ERP multiples, Sage, Power BI, bases locales, Excel) : l'IA est sollicitée comme une couche d'intégration pour faire parler des données aujourd'hui cloisonnées.", "Une supply chain subie : faible visibilité client, ruptures composants et replanifications manuelles poussent à chercher de l'anticipation plutôt que de la réaction.", "Un savoir-faire industriel peu capitalisé et dispersé entre sites multilingues (France, Tunisie, Portugal, Belgique), qui dépend de quelques personnes clés.", "Une adhésion très inégale selon la hiérarchie (AIM N1 = 82,35 ; N3 = -13,54), alors que la majorité des projets concernent le quotidien des équipes de terrain.", "Un taux de dissonance élevé (44,83 %) qui signale un décalage entre l'envie, la compétence et la capacité à projeter des usages concrets."], "besoin_latent_global": "Disposer d'un socle de données unifié et fiable à l'échelle du groupe pour décider plus vite, plutôt que d'empiler de nouveaux outils.", "lecture_strategique": {"court_terme": {"trajectoire": "Industrialiser quelques cas d'usage à gain rapide (rapprochements fournisseurs, reporting financier, analyse des tests, gestion des e-mails) avec un cadre d'usage commun.", "benefices": "Temps libéré sur les tâches à faible valeur ajoutée, preuves de valeur visibles par les équipes, montée en compétence des contributeurs actifs.", "risques": "Multiplication d'outils individuels non maintenus, fuite de données vers des IA hors UE, désengagement des équipes de production si elles ne voient pas de bénéfice direct."}, "long_terme": {"trajectoire": "Construire une infrastructure de données groupe interopérable servant de base à la planification prédictive, à la qualité augmentée et à l'usine connectée.", "benefices": "Réactivité supply chain, avantage compétitif en avant-vente, savoir-faire capitalisé et transmissible entre filiales.", "risques": "Investissements lourds sans gouvernance claire, dépendance à des fournisseurs d'IA, résistance des opérateurs à la mesure automatisée des postes."}}, "angle_mort": "De nombreux collaborateurs construisent déjà leurs propres applications et scripts avec l'IA (planning CMS, validation des stencils, conversion de BOM, artefacts). Ce système d'information parallèle, non gouverné, peut devenir à la fois le meilleur accélérateur et la principale dette technique du groupe.", "besoins_latents_fondamentaux": ["Interopérabilité des données entre filiales et outils", "Anticipation plutôt que réaction", "Capitalisation et transmission du savoir-faire", "Sens et reconnaissance pour les équipes de terrain", "Cadre de confiance (sécurité, souveraineté, réversibilité)"], "question_strategique": "Quel socle de données commun le groupe est-il prêt à financer en priorité, et quels sont les trois projets à lancer d'abord pour que les 40 idées recensées ne deviennent pas 40 outils isolés ?"};
+const portfolio = {"nb_projets_bruts": 132, "nb_projets_dedoublonnes": 40, "densite_projection": 9.98, "seuil_densite": 25, "distribution": {"X_relation_client": {"count": 9, "percentage": 22.5, "projets": ["Prospection ciblée et détection de nouveaux clients / sociétés pionnières", "Relances et accusés de réception automatisés vers prospects et clients", "Comptes rendus de visite commerciale enrichis", "Vue client 360° (CA, marge, stocks, santé financière, retards de paiement)", "Suivi des marges par produit et par client selon le prix des composants", "Chiffrage, devis et réponses RFQ/RFI accélérés et fiabilisés", "Analyse amont des dossiers techniques clients (BOM, Gerber, DFM) et portail client", "Faisabilité des commandes clients et proposition de dates d'AR", "Marketing digital : contenus réseaux sociaux, SEO/GEO, CRM, veille concurrentielle"]}, "Y_productivite": {"count": 25, "percentage": 62.5, "projets": ["Tri, priorisation, résumé et réponses assistées des e-mails", "Rédaction assistée : comptes rendus, documents répétitifs, présentations, traductions", "Tableaux de bord et KPI temps réel (refonte / remplacement Power BI)", "Reporting financier automatisé : clôtures, flash CA, forecast, trésorerie", "Contrôles comptables et fiscaux : anomalies, FEC, TVA, DEB, factures transport", "Rapprochement commandes / AR fournisseurs / factures et backlog fournisseurs", "Optimisation des achats et analyse comparative des fournisseurs", "Prévision des besoins, anticipation des ruptures et optimisation des stocks", "Planification de production dynamique, S&OP / PDP et prévision des charges", "Maintenance prédictive et préventive (GMAO)", "Analyse des données de test ICT/FCT et aide au diagnostic des pannes", "Inspection AOI/SPI : réduction des faux défauts et correction des dérives", "Analyse qualité : non-conformités, causes récurrentes, agent 8D", "Documentation technique et industrialisation : fiches d'instruction, dossiers, NPI", "Conversion et codification des BOM clients, recherche d'équivalences composants", "Applications métiers sur mesure pour digitaliser Excel / papier et supprimer les doubles saisies", "Traçabilité et centralisation du statut des cartes et des OF", "Base de connaissances et assistant interne (procédures, normes, retours d'expérience)", "Développement logiciel assisté et création d'outils internes", "RH : recrutement, polyvalence, fiches de poste, onboarding", "Juridique et conformité : contrathèque, alertes réglementaires, analyse de contrats", "Prévention HSE : produits chimiques et risques", "Support IT automatisé et analyse de logs de sécurité", "Douane et logistique import : codes HS, documents, répartition des coûts", "Automatisation des processus KAM / ADV et gestion des obsolescences (PCN)"]}, "Z_rd": {"count": 6, "percentage": 15.0, "projets": ["Industrie 4.0 : atelier connecté, Andon intelligent, mesure automatique du process", "Cadre stratégique et gouvernance IA du groupe (réversibilité, souveraineté des données)", "Veille stratégique, analyse fondamentale et identification de cibles d'acquisition", "Service d'accompagnement des clients vers la certification normative", "Intégration de l'IA dans les logiciels et produits du groupe", "Assistance à l'innovation : états de l'art, structuration des idées"]}}, "equilibre": "Le portefeuille est très majoritairement orienté productivité interne (Y), porté par la production, la supply chain et la finance. La relation client (X) se concentre sur l'avant-vente (chiffrage, analyse des dossiers clients) et la R&D / stratégie (Z) reste minoritaire.", "commentaire_entonnoir": "132 idées brutes ramenées à 40 projets uniques, soit une densité de projection de 10.0 % de l'effectif ciblé, en dessous du seuil de 25 % : les idées sont riches mais portées par un nombre restreint de contributeurs.", "mapping_verbatims": {"X1": {"projet": "Prospection ciblée et détection de nouveaux clients / sociétés pionnières", "verbatims_index_1_based": [15, 105, 114, 132]}, "X2": {"projet": "Relances et accusés de réception automatisés vers prospects et clients", "verbatims_index_1_based": [18, 114]}, "X3": {"projet": "Comptes rendus de visite commerciale enrichis", "verbatims_index_1_based": [17]}, "X4": {"projet": "Vue client 360° (CA, marge, stocks, santé financière, retards de paiement)", "verbatims_index_1_based": [20]}, "X5": {"projet": "Suivi des marges par produit et par client selon le prix des composants", "verbatims_index_1_based": [4, 19]}, "X6": {"projet": "Chiffrage, devis et réponses RFQ/RFI accélérés et fiabilisés", "verbatims_index_1_based": [4, 71, 73, 78, 84, 99, 122, 124, 132]}, "X7": {"projet": "Analyse amont des dossiers techniques clients (BOM, Gerber, DFM) et portail client", "verbatims_index_1_based": [9, 44, 62, 83]}, "X8": {"projet": "Faisabilité des commandes clients et proposition de dates d'AR", "verbatims_index_1_based": [100]}, "X9": {"projet": "Marketing digital : contenus réseaux sociaux, SEO/GEO, CRM, veille concurrentielle", "verbatims_index_1_based": [116]}, "Y1": {"projet": "Tri, priorisation, résumé et réponses assistées des e-mails", "verbatims_index_1_based": [1, 24, 51, 70, 75, 77, 114, 115]}, "Y2": {"projet": "Rédaction assistée : comptes rendus, documents répétitifs, présentations, traductions", "verbatims_index_1_based": [5, 52, 60, 64, 77, 81, 104, 118, 128]}, "Y3": {"projet": "Tableaux de bord et KPI temps réel (refonte / remplacement Power BI)", "verbatims_index_1_based": [3, 8, 25, 34, 42, 53, 63, 79, 85, 96, 105, 109, 112, 117]}, "Y4": {"projet": "Reporting financier automatisé : clôtures, flash CA, forecast, trésorerie", "verbatims_index_1_based": [11, 25, 72, 91, 127]}, "Y5": {"projet": "Contrôles comptables et fiscaux : anomalies, FEC, TVA, DEB, factures transport", "verbatims_index_1_based": [55, 56, 57, 58, 127]}, "Y6": {"projet": "Rapprochement commandes / AR fournisseurs / factures et backlog fournisseurs", "verbatims_index_1_based": [3, 4, 12, 26, 32, 71, 122]}, "Y7": {"projet": "Optimisation des achats et analyse comparative des fournisseurs", "verbatims_index_1_based": [3, 4, 28, 84, 103, 104, 106]}, "Y8": {"projet": "Prévision des besoins, anticipation des ruptures et optimisation des stocks", "verbatims_index_1_based": [28, 47, 50, 84, 103, 105, 106]}, "Y9": {"projet": "Planification de production dynamique, S&OP / PDP et prévision des charges", "verbatims_index_1_based": [21, 37, 38, 80, 93, 97, 113, 117, 130]}, "Y10": {"projet": "Maintenance prédictive et préventive (GMAO)", "verbatims_index_1_based": [21, 22, 89]}, "Y11": {"projet": "Analyse des données de test ICT/FCT et aide au diagnostic des pannes", "verbatims_index_1_based": [13, 22, 120, 125]}, "Y12": {"projet": "Inspection AOI/SPI : réduction des faux défauts et correction des dérives", "verbatims_index_1_based": [48, 66]}, "Y13": {"projet": "Analyse qualité : non-conformités, causes récurrentes, agent 8D", "verbatims_index_1_based": [27, 31, 35, 38, 94, 121]}, "Y14": {"projet": "Documentation technique et industrialisation : fiches d'instruction, dossiers, NPI", "verbatims_index_1_based": [23, 35, 54, 73, 82, 87, 95]}, "Y15": {"projet": "Conversion et codification des BOM clients, recherche d'équivalences composants", "verbatims_index_1_based": [4, 41, 43, 44, 65, 76, 131]}, "Y16": {"projet": "Applications métiers sur mesure pour digitaliser Excel / papier et supprimer les doubles saisies", "verbatims_index_1_based": [16, 29, 65, 86, 88, 89, 109, 110, 119]}, "Y17": {"projet": "Traçabilité et centralisation du statut des cartes et des OF", "verbatims_index_1_based": [61, 70, 96, 129]}, "Y18": {"projet": "Base de connaissances et assistant interne (procédures, normes, retours d'expérience)", "verbatims_index_1_based": [14, 33, 68, 77, 83, 84, 92, 98, 107]}, "Y19": {"projet": "Développement logiciel assisté et création d'outils internes", "verbatims_index_1_based": [1, 7, 10, 64, 67, 101, 102]}, "Y20": {"projet": "RH : recrutement, polyvalence, fiches de poste, onboarding", "verbatims_index_1_based": [21, 28, 34, 74, 84, 108, 123]}, "Y21": {"projet": "Juridique et conformité : contrathèque, alertes réglementaires, analyse de contrats", "verbatims_index_1_based": [30, 74, 118, 122]}, "Y22": {"projet": "Prévention HSE : produits chimiques et risques", "verbatims_index_1_based": [36]}, "Y23": {"projet": "Support IT automatisé et analyse de logs de sécurité", "verbatims_index_1_based": [111]}, "Y24": {"projet": "Douane et logistique import : codes HS, documents, répartition des coûts", "verbatims_index_1_based": [6, 59, 119]}, "Y25": {"projet": "Automatisation des processus KAM / ADV et gestion des obsolescences (PCN)", "verbatims_index_1_based": [40, 41, 76]}, "Z1": {"projet": "Industrie 4.0 : atelier connecté, Andon intelligent, mesure automatique du process", "verbatims_index_1_based": [69, 121, 126]}, "Z2": {"projet": "Cadre stratégique et gouvernance IA du groupe (réversibilité, souveraineté des données)", "verbatims_index_1_based": [2, 45, 46]}, "Z3": {"projet": "Veille stratégique, analyse fondamentale et identification de cibles d'acquisition", "verbatims_index_1_based": [39, 123]}, "Z4": {"projet": "Service d'accompagnement des clients vers la certification normative", "verbatims_index_1_based": [90]}, "Z5": {"projet": "Intégration de l'IA dans les logiciels et produits du groupe", "verbatims_index_1_based": [1]}, "Z6": {"projet": "Assistance à l'innovation : états de l'art, structuration des idées", "verbatims_index_1_based": [49, 101]}}};
+const bonnesNouvelles = [{"rang": 1, "signal": "aim_favorable", "condition_remplie": true, "phrase": "La dynamique globale est positive (AIM = 19.21)."}, {"rang": 2, "signal": "capacite_action", "condition_remplie": true, "phrase": "L'organisation dispose d'une base d'adhésion et d'un noyau de porteurs (Confiants 81.77%, Leaders 76)."}, {"rang": 3, "signal": "gouvernance_ok", "condition_remplie": true, "phrase": "La gouvernance n'est pas un frein (N1 bloquants 0.0% < 34%)."}];
+const defis = [{"rang": 4, "probleme": "dissonance_elevee", "gravite": "serieux", "condition_remplie": true, "phrase": "Les réponses sont peu cohérentes (dissonance 44.83%)."}, {"rang": 6, "probleme": "decrochages_locaux", "gravite": "attention", "condition_remplie": true, "phrase": "Le segment Employé / Technicien décroche (AIM = -13.54, soit -32.8 pts vs moyenne)."}];
+const orientation = {"condition_declenchee": "demarche_ia", "phrase": "Les données indiquent que l'organisation est prête à structurer une démarche IA (Comité IA + Feuille de route + expérimentation d'outils)."};
+const s2Data = {"confiants": {"absolu": 166, "percentage": 81.77, "seuil_absolu": 10, "seuil_pct": 25, "atteint": true, "commentaire": "Base d'adhésion atteinte."}, "reservoir_leaders": {"absolu": 76, "percentage": 37.44, "seuil": 5, "atteint": true, "commentaire": "Noyau prêt pour un Comité IA."}, "directeurs_bloquants": {"percentage": 0.0, "seuil": 34, "atteint": true, "commentaire": "Gouvernance dirigeante non bloquante."}};
+const s2Proj = {"nb_projets_bruts": 132, "seuil_projets": 20, "atteint_projets": true, "commentaire_projets": "Nécessité d'un audit pour classer par ROI.", "appetence": {"absolu": 80, "percentage": 39.41, "seuil": 25, "atteint": true, "commentaire": "Réservoir d'expérimentation suffisant à clarifier."}};
+const s4Data = {"fracture": {"sigma": 3.37, "seuil": 15, "alerte": false, "commentaire": "Niveau de compétence relativement homogène."}, "naivete": {"count": 8, "percentage": 3.94, "seuil": 30, "alerte": false, "commentaire": "Taux de naïveté sous contrôle."}, "dissonance": {"count": 91, "percentage": 44.83, "seuil": 30, "alerte": true, "commentaire": "Incertitude forte : audit humain recommandé."}, "remise": {"count_projet_pour_soi": 72, "count_avec_projet": 80, "percentage": 90.0, "seuil": 70, "atteint": true, "commentaire": "Appropriation personnelle de l'IA."}, "engagement": {"count_projet_pour_autres": 40, "count_avec_projet": 80, "percentage": 50.0, "seuil": 30, "atteint": true, "commentaire": "Vision transversale suffisante."}, "consultants": {"count": 8, "count_avec_projet": 80, "percentage": 10.0, "seuil": 30, "atteint": true, "commentaire": "Équilibre entre intérêt personnel et collectif."}};
+
+// ============================================================
+// TOOLTIP SYSTEM — Refonte complète
+// ============================================================
+let activeTooltip = null;
+
+// Special tooltip for AIM Score formula
+const aimFormulaTooltip = {
+    label: "AI.M Score",
+    definition: "Indicateur global de maturit\u00e9 IA de l'organisation.",
+    calcul: "(Nombre de Leaders \u2212 Nombre de M\u00e9fiants) / Nombre de participants \u00d7 100<br><br><strong>Leaders</strong> = Confiants ayant d\u00e9clar\u00e9 au moins un projet IA<br><strong>Plage</strong> : [-100, +100]",
+    ideal: "Sup\u00e9rieur \u00e0 0. Un score positif = plus de Leaders que de M\u00e9fiants. Plus il est \u00e9lev\u00e9, plus l'organisation est pr\u00eate \u00e0 agir."
+};
+
+function positionTooltip(pop, triggerEl) {
+    const rect = triggerEl.getBoundingClientRect();
+    const popW = Math.min(340, window.innerWidth * 0.9);
+    pop.style.width = popW + 'px';
+
+    // Mesure la hauteur sans afficher (visibility:hidden uniquement, PAS display:none
+    // pour éviter que le style inline n'écrase la classe CSS .show)
+    pop.style.visibility = 'hidden';
+    pop.style.display = 'block';
+    const popH = pop.offsetHeight;
+    // Ne PAS remettre display:none ici — laisser .show gérer le display via CSS
+    pop.style.display = '';
+    pop.style.visibility = '';
+
+    let top;
+    if (rect.top - popH - 10 > 0) {
+        top = rect.top - popH - 10;
+    } else {
+        top = rect.bottom + 10;
+    }
+
+    let left = rect.left + rect.width / 2 - popW / 2;
+    if (left < 8) left = 8;
+    if (left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
+
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
+}
+
+function showTooltip(el) {
+    closeAllTooltips();
+    const key = el.getAttribute('data-tt-key');
+    let t;
+    if (key === 'aim_score_formula') {
+        t = aimFormulaTooltip;
+    } else {
+        t = tooltips[key];
+    }
+    if (!t) return;
+
+    const pop = document.createElement('div');
+    pop.className = 'tt-pop';
+    pop.innerHTML = '<strong>' + t.label + '</strong><br><br>' + t.definition + '<br><br><em>Calcul : ' + t.calcul + '</em><br><em>Id\u00e9al : ' + t.ideal + '</em>';
+    document.body.appendChild(pop);
+    positionTooltip(pop, el);
+    pop.classList.add('show');
+    activeTooltip = { pop: pop, trigger: el };
+}
+
+function closeAllTooltips() {
+    document.querySelectorAll('.tt-pop').forEach(p => p.remove());
+    activeTooltip = null;
+}
+
+function handleTooltipClick(e) {
+    const el = e.currentTarget;
+    e.stopPropagation();
+    if (activeTooltip && activeTooltip.trigger === el) {
+        closeAllTooltips();
+    } else {
+        showTooltip(el);
+    }
+}
+
+// Desktop: hover + click toggle; Mobile: tap toggle
+function initTooltips() {
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    // --- CLICK / TAP (desktop + mobile) : toggle affichage/masquage ---
+    document.addEventListener('click', function(e) {
+        const el = e.target.closest('.tt');
+        if (el) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (activeTooltip && activeTooltip.trigger === el) {
+                closeAllTooltips();  // 2ème tap = fermeture
+            } else {
+                showTooltip(el);     // 1er tap = ouverture
+            }
+        } else {
+            // Clic en dehors = fermeture (sauf si clic sur le popup lui-même)
+            if (activeTooltip && !activeTooltip.pop.contains(e.target)) {
+                closeAllTooltips();
+            }
+        }
+    });
+
+    // --- HOVER (desktop uniquement) ---
+    if (!isMobile) {
+        document.addEventListener('mouseover', function(e) {
+            const el = e.target.closest('.tt');
+            if (el) { showTooltip(el); }
+        });
+        document.addEventListener('mouseout', function(e) {
+            const el = e.target.closest('.tt');
+            if (el) {
+                const related = e.relatedTarget;
+                // Fermer seulement si on ne va pas vers le popup
+                if (!related || !(activeTooltip && activeTooltip.pop.contains(related))) {
+                    closeAllTooltips();
+                }
+            } else if (activeTooltip) {
+                // Quitter le popup lui-même
+                const pop = activeTooltip.pop;
+                if (pop.contains(e.target) && !pop.contains(e.relatedTarget)) {
+                    closeAllTooltips();
+                }
+            }
+        });
+    }
+
+    // --- SCROLL : fermeture automatique ---
+    window.addEventListener('scroll', function() {
+        if (activeTooltip) { closeAllTooltips(); }
+    }, { passive: true });
+
+    // --- TOUCHE ECHAP ---
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && activeTooltip) { closeAllTooltips(); }
+    });
+}
+
+// ============================================================
+// DONUT CHART (Canvas)
+// ============================================================
+function drawDonut() {
+    const canvas = document.getElementById('donutChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const data = [76, 90, 37];
+    const colors = ['#22C55E', '#F59E0B', '#EF4444'];
+    const total = data.reduce((a,b) => a+b, 0);
+    const cx = 130, cy = 130, r = 100, rInner = 60;
+    let angle = -Math.PI/2;
+    data.forEach((val, i) => {
+        const slice = (val/total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, angle, angle + slice);
+        ctx.arc(cx, cy, rInner, angle + slice, angle, true);
+        ctx.closePath();
+        ctx.fillStyle = colors[i];
+        ctx.fill();
+        angle += slice;
+    });
+    ctx.fillStyle = '#171B20';
+    ctx.font = 'bold 32px DM Sans, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(total, cx, cy + 5);
+    ctx.font = '12px DM Sans, Arial';
+    ctx.fillStyle = '#666';
+    ctx.fillText('r\u00e9pondants', cx, cy + 22);
+}
+
+// ============================================================
+// BAR CHARTS
+// ============================================================
+function drawBars(containerId, data) {
+    const container = document.getElementById(containerId);
+    data.forEach(item => {
+        const aim = item.aim_score;
+        const color = aim >= 20 ? '#22C55E' : aim >= 0 ? '#F59E0B' : '#EF4444';
+        const pct = Math.max(2, Math.min(100, (aim + 100) / 2));
+        container.innerHTML += '<div class="bar-row"><div class="bar-label">' + (item.label || item.code) + '</div><div class="bar-track-h"><div class="bar-fill-h" style="width:' + pct + '%;background:' + color + '">' + aim + '</div></div><span class="bar-n">n=' + item.nb_repondants + '</span></div>';
+    });
+}
+
+// ============================================================
+// CAPACITY CARDS — Chiffre + Pourcentage
+// ============================================================
+function drawCapacityCards() {
+    const container = document.getElementById('capacityCards');
+    const n = 203;
+    const cards = [
+        { label: 'Confiants', val: s2Data.confiants.absolu, pct: s2Data.confiants.percentage,
+           comment: s2Data.confiants.commentaire, ok: s2Data.confiants.atteint, ttKey: 'confiants' },
+        { label: 'R\u00e9servoir Leaders', val: s2Data.reservoir_leaders.absolu, pct: s2Data.reservoir_leaders.percentage,
+           comment: s2Data.reservoir_leaders.commentaire, ok: s2Data.reservoir_leaders.atteint, ttKey: 'leaders' },
+        { label: 'Dir. bloquants', val: s2Data.directeurs_bloquants.count !== undefined ? s2Data.directeurs_bloquants.count : '', pct: s2Data.directeurs_bloquants.percentage,
+           comment: s2Data.directeurs_bloquants.commentaire, ok: s2Data.directeurs_bloquants.atteint, ttKey: 'directeurs_bloquants' },
+        { label: 'Projets d\u00e9clar\u00e9s', val: s2Proj.nb_projets_bruts, pct: null,
+           comment: s2Proj.commentaire_projets, ok: s2Proj.atteint_projets, ttKey: 'nb_projets' },
+        { label: 'App\u00e9tence', val: s2Proj.appetence.absolu, pct: s2Proj.appetence.percentage,
+           comment: s2Proj.appetence.commentaire, ok: s2Proj.appetence.atteint, ttKey: 'appetence' },
+    ];
+    cards.forEach(c => {
+        const cls = c.ok ? 'ok' : (c.label.includes('bloquant') ? 'alert' : 'warn');
+        let display = '';
+        if (c.pct !== null && c.pct !== undefined) {
+            display = '<div class="val">' + c.val + '</div><div class="sub-val">' + c.pct + '%</div>';
+        } else {
+            display = '<div class="val">' + c.val + '</div>';
+        }
+        container.innerHTML += '<div class="card ' + cls + '"><span class="tt" data-tt-key="' + c.ttKey + '">i</span><div class="lbl">' + c.label + '</div>' + display + '<div class="comment">' + c.comment + '</div></div>';
+    });
+}
+
+// ============================================================
+// PARTICIPANTS TABLE — avec filtres et normalisation /20
+// ============================================================
+function drawParticipants() {
+    // Build filter dropdowns
+    const filterBar = document.getElementById('participantFilters');
+    const services = [...new Set(participants.map(p => p.departement))].sort();
+    const niveaux = [...new Set(participants.map(p => p.niveau_code))].sort();
+
+    let filterHtml = '<select id="filterService"><option value="">Tous les services</option>';
+    services.forEach(s => { filterHtml += '<option value="' + s + '">' + s + '</option>'; });
+    filterHtml += '</select>';
+
+    filterHtml += '<select id="filterNiveau"><option value="">Tous les niveaux</option>';
+    niveaux.forEach(n => { filterHtml += '<option value="' + n + '">' + n + '</option>'; });
+    filterHtml += '</select>';
+
+    filterHtml += '<select id="filterCategorie"><option value="">Toutes les cat\u00e9gories</option><option value="Leader">Leader</option><option value="Enthousiaste">Enthousiaste</option><option value="M\u00e9fiant">M\u00e9fiant</option></select>';
+    filterBar.innerHTML = filterHtml;
+
+    // Draw table
+    renderParticipantsTable();
+
+    // Event listeners
+    document.getElementById('filterService').addEventListener('change', renderParticipantsTable);
+    document.getElementById('filterNiveau').addEventListener('change', renderParticipantsTable);
+    document.getElementById('filterCategorie').addEventListener('change', renderParticipantsTable);
+}
+
+function renderParticipantsTable() {
+    const table = document.getElementById('participantsTable');
+    const svcFilter = document.getElementById('filterService') ? document.getElementById('filterService').value : '';
+    const nivFilter = document.getElementById('filterNiveau') ? document.getElementById('filterNiveau').value : '';
+    const catFilter = document.getElementById('filterCategorie') ? document.getElementById('filterCategorie').value : '';
+
+    let filtered = participants.filter(p => {
+        if (svcFilter && p.departement !== svcFilter) return false;
+        if (nivFilter && p.niveau_code !== nivFilter) return false;
+        if (catFilter && p.categorie !== catFilter) return false;
+        return true;
+    });
+
+    let html = '<thead><tr><th>#</th><th>Nom</th><th>Fonction</th><th>Service</th><th>Niveau</th><th>D1 (Confiance)</th><th>D2 (Connaissance)</th><th>D3 (App\u00e9tence)</th><th>Note /20</th><th>Cat\u00e9gorie</th></tr></thead><tbody>';
+    filtered.forEach((p, idx) => {
+        const cls = p.categorie === 'Leader' ? 'cat-leader' : p.categorie === 'Enthousiaste' ? 'cat-enthousiaste' : 'cat-mefiant';
+        const icon = p.categorie === 'Leader' ? '\ud83d\udfe2' : p.categorie === 'Enthousiaste' ? '\ud83d\udfe0' : '\ud83d\udd34';
+        const d1 = p.d1_display !== undefined ? p.d1_display : (p.d1_total / 3).toFixed(2);
+        const d2 = p.d2_display !== undefined ? p.d2_display : (p.d2_total / 3).toFixed(2);
+        const d3 = p.d3_display !== undefined ? p.d3_display : (p.d3_total / 3).toFixed(2);
+        const note20 = p.note_sur_20 !== undefined ? p.note_sur_20 : ((parseFloat(d1) + parseFloat(d2) + parseFloat(d3) + 7.5) * 20 / 15).toFixed(1);
+        html += '<tr><td>' + (idx + 1) + '</td><td>' + (p.is_anonymous ? '<em style="color:#999">' + p.prenom_nom + '</em>' : p.prenom_nom) + '</td><td style="font-size:12px">' + (p.fonction || '\u2014') + '</td><td style="font-size:12px">' + p.departement + '</td><td style="font-size:12px">' + p.niveau_code + '</td><td>' + d1 + '</td><td>' + d2 + '</td><td>' + d3 + '</td><td><strong>' + note20 + '</strong></td><td class="' + cls + '">' + icon + ' ' + p.categorie + '</td></tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+
+    const countEl = document.getElementById('participantCount');
+    if (countEl) countEl.textContent = filtered.length + ' r\u00e9sultat(s) sur ' + participants.length;
+}
+
+// ============================================================
+// HEATMAP — Plotly avec tooltips enrichis
+// ============================================================
+function drawHeatmap() {
+    const nivLabels = {'N1':'Direction','N2':'Cadre','N3':'Employ\u00e9'};
+    const deptLabels = {'P2':'Relation Client','P3':'Production/RH','P4':'Compta/Admin','P5':'R&D/Innovation','P1':'Direction g\u00e9n.'};
+    const deptOrder = ['P2','P3','P4','P5','P1'];
+    const nivOrder = ['N1','N2','N3'];
+
+    const z = [], customdata = [], xLabels = deptOrder.map(d => deptLabels[d]), yLabels = nivOrder.map(n => nivLabels[n]);
+
+    nivOrder.forEach(n => {
+        const row = [], cdRow = [];
+        deptOrder.forEach(d => {
+            const cell = heatmapData.find(m => m.departement === d && m.niveau === n);
+            const pct = cell ? cell.pct_non_confiants : null;
+            const nb = cell ? cell.nb_repondants : 0;
+            const nbm = cell ? (cell.nb_mefiants || 0) : 0;
+            row.push(nb > 0 ? pct : null);
+            cdRow.push({ niv: nivLabels[n], dept: deptLabels[d], nb: nb, nbm: nbm, pct: pct });
+        });
+        z.push(row);
+        customdata.push(cdRow);
+    });
+
+    const trace = {
+        type: 'heatmap', z: z, x: xLabels, y: yLabels, customdata: customdata,
+        colorscale: [[0,'#dcfce7'],[0.3,'#fef9c3'],[0.6,'#fed7aa'],[1,'#fecaca']],
+        zmin: 0, zmax: 100,
+        hovertemplate: '<b>%{customdata.niv} \u00d7 %{customdata.dept}</b><br>R\u00e9pondants : %{customdata.nb}<br>M\u00e9fiants : %{customdata.nbm}<br>Taux : %{z:.0f}%<extra></extra>',
+        text: z.map((row, ri) => row.map((v, ci) => {
+            if (v === null) return '\u2014';
+            return v.toFixed(0) + '%';
+        })),
+        texttemplate: '%{text}', showscale: true,
+        colorbar: { title: '% M\u00e9fiants', titleside: 'right' }
+    };
+
+    const layout = {
+        margin: { t: 10, b: 60, l: 100, r: 80 },
+        xaxis: { side: 'bottom' },
+        yaxis: { autorange: 'reversed' },
+        font: { family: 'DM Sans, Arial, sans-serif', size: 13 },
+        height: 280
+    };
+
+    Plotly.newPlot('heatmapPlotly', [trace], layout, { displayModeBar: true, displaylogo: false, responsive: true, modeBarButtonsToRemove: ['lasso2d','select2d'] });
+}
+
+// ============================================================
+// RADAR — Plotly avec valeurs absolues
+// ============================================================
+function drawRadar() {
+    // positif = dépasser le seuil est bon (vert) ; négatif = dépasser est mauvais (rouge)
+    const indicators = [
+        { name: 'Naïveté',          val: s4Data.naivete.percentage,    seuil: s4Data.naivete.seuil,    count: s4Data.naivete.count,                       positif: false },
+        { name: 'Dissonance',           val: s4Data.dissonance.percentage, seuil: s4Data.dissonance.seuil, count: s4Data.dissonance.count,                    positif: false },
+        { name: 'Remise en question',   val: s4Data.remise.percentage,     seuil: s4Data.remise.seuil,     count: s4Data.remise.count_projet_pour_soi,        positif: true  },
+        { name: 'Engagement collectif', val: s4Data.engagement.percentage, seuil: s4Data.engagement.seuil, count: s4Data.engagement.count_projet_pour_autres, positif: true  },
+        { name: '% Consultants',        val: s4Data.consultants.percentage,seuil: s4Data.consultants.seuil,count: s4Data.consultants.count,                   positif: false },
+    ];
+
+    // Normalisation : seuil toujours tracé à 70 sur l'axe (0-100)
+    // valeur_norm = (valeur_réelle / seuil) * 70  — plafonné à 100
+    const SEUIL_NORM = 70;
+    const normalize = (val, seuil) => seuil > 0 ? Math.min(100, (val / seuil) * SEUIL_NORM) : 0;
+
+    const theta     = indicators.map(i => i.name);
+    const rNorm     = indicators.map(i => normalize(i.val, i.seuil));
+    const seuilNorm = indicators.map(() => SEUIL_NORM);  // cercle à 70 pour tous
+    const hoverTexts = indicators.map(i =>
+        i.name + '<br>Valeur réelle : ' + i.val + '%' +
+        '<br>Seuil : ' + i.seuil + '%' +
+        '<br>Absolu : ' + i.count
+    );
+
+    const traceVal = {
+        type: 'scatterpolar', r: [...rNorm, rNorm[0]], theta: [...theta, theta[0]],
+        fill: 'toself', fillcolor: 'rgba(13,115,119,0.15)',
+        line: { color: '#0d7377', width: 2 },
+        name: 'Valeurs', text: hoverTexts.concat([hoverTexts[0]]),
+        hoverinfo: 'text'
+    };
+    const traceSeuil = {
+        type: 'scatterpolar', r: [...seuilNorm, seuilNorm[0]], theta: [...theta, theta[0]],
+        line: { color: '#EF4444', width: 1, dash: 'dash' },
+        name: "Seuil d'alerte (70%)", hoverinfo: 'skip'
+    };
+
+    // Couleurs des labels d'axe : vert si positif, rouge si négatif
+    const GREEN = '#16a34a';
+    const RED   = '#EF4444';
+    const angularTickColors = indicators.map(i => i.positif ? GREEN : RED);
+
+    const layout = {
+        polar: {
+            radialaxis: {
+                visible: true,
+                range: [0, 100],
+                tickvals: [0, SEUIL_NORM, 100],
+                ticktext: ['0', 'seuil', '100'],
+                tickfont: { size: 10 }
+            },
+            angularaxis: {
+                tickfont: { size: 12 }
+            }
+        },
+        showlegend: true,
+        legend: { x: 0.5, y: -0.15, xanchor: 'center', orientation: 'h' },
+        margin: { t: 30, b: 60, l: 60, r: 60 },
+        font: { family: 'DM Sans, Arial, sans-serif', size: 12 },
+        height: 400
+    };
+
+    Plotly.newPlot('radarPlotly', [traceVal, traceSeuil], layout, {
+        displayModeBar: true, displaylogo: false, responsive: true
+    });
+
+    // Colorier les labels d'axe après rendu (Plotly ne supporte pas les couleurs par axe nativement)
+    setTimeout(function() {
+        const svgEl = document.querySelector('#radarPlotly svg');
+        if (!svgEl) return;
+        // Les labels angulaires sont dans des éléments <text> de classe 'angularaxistick'
+        const tickTexts = svgEl.querySelectorAll('.angularaxistick text, .angular-axis text, text.angularaxistick');
+        tickTexts.forEach(function(el) {
+            const label = el.textContent.trim();
+            const ind = indicators.find(i => i.name === label);
+            if (ind) el.style.fill = ind.positif ? GREEN : RED;
+        });
+        // Fallback : chercher par contenu de texte dans tous les <text> du SVG
+        if (tickTexts.length === 0) {
+            svgEl.querySelectorAll('text').forEach(function(el) {
+                const label = el.textContent.trim();
+                const ind = indicators.find(i => i.name === label);
+                if (ind) el.style.fill = ind.positif ? GREEN : RED;
+            });
+        }
+    }, 300);
+}
+
+// ============================================================
+// INDICATOR CARDS — avec valeurs absolues + pourcentages
+// ============================================================
+function drawIndicators() {
+    const container = document.getElementById('indicatorCards');
+    const inds = [
+        { key: 'fracture_savoir', label: 'Fracture du savoir (\u03c3)', val: s4Data.fracture.sigma, seuil: s4Data.fracture.seuil, alerte: s4Data.fracture.alerte, comment: s4Data.fracture.commentaire, unit: '', detail: '\u03c3 = ' + s4Data.fracture.sigma + ' (seuil : \u2264 ' + s4Data.fracture.seuil + ')' },
+        { key: 'naivete', label: 'Na\u00efvet\u00e9', val: s4Data.naivete.percentage, seuil: s4Data.naivete.seuil, alerte: s4Data.naivete.alerte, comment: s4Data.naivete.commentaire, unit: '%', detail: s4Data.naivete.count + ' r\u00e9pondants \u2014 ' + s4Data.naivete.percentage + '% (seuil : \u2264 ' + s4Data.naivete.seuil + '%)' },
+        { key: 'dissonance', label: 'Dissonance (V2)', val: s4Data.dissonance.percentage, seuil: s4Data.dissonance.seuil, alerte: s4Data.dissonance.alerte, comment: s4Data.dissonance.commentaire, unit: '%', detail: s4Data.dissonance.count + ' r\u00e9pondants \u2014 ' + s4Data.dissonance.percentage + '% (seuil : \u2264 ' + s4Data.dissonance.seuil + '%)' },
+        { key: 'remise_en_question', label: 'Remise en question', val: s4Data.remise.percentage, seuil: s4Data.remise.seuil, alerte: !s4Data.remise.atteint, comment: s4Data.remise.commentaire, unit: '%', detail: s4Data.remise.count_projet_pour_soi + ' / ' + s4Data.remise.count_avec_projet + ' porteurs \u2014 ' + s4Data.remise.percentage + '% (seuil : \u2265 ' + s4Data.remise.seuil + '%)' },
+        { key: 'engagement_collectif', label: 'Engagement collectif', val: s4Data.engagement.percentage, seuil: s4Data.engagement.seuil, alerte: !s4Data.engagement.atteint, comment: s4Data.engagement.commentaire, unit: '%', detail: s4Data.engagement.count_projet_pour_autres + ' / ' + s4Data.engagement.count_avec_projet + ' porteurs \u2014 ' + s4Data.engagement.percentage + '% (seuil : \u2265 ' + s4Data.engagement.seuil + '%)' },
+        { key: 'pct_consultants', label: '% Consultants', val: s4Data.consultants.percentage, seuil: s4Data.consultants.seuil, alerte: !s4Data.consultants.atteint, comment: s4Data.consultants.commentaire, unit: '%', detail: s4Data.consultants.count + ' / ' + s4Data.consultants.count_avec_projet + ' porteurs \u2014 ' + s4Data.consultants.percentage + '% (seuil : \u2264 ' + s4Data.consultants.seuil + '%)' },
+    ];
+
+    inds.forEach(ind => {
+        const cls = ind.alerte ? 'alert' : 'ok';
+        container.innerHTML += '<div class="card ' + cls + '"><span class="tt" data-tt-key="' + ind.key + '">i</span><div class="lbl">' + ind.label + '</div><div class="val">' + ind.val + ind.unit + '</div><div class="ind-detail">' + ind.detail + '</div><div class="comment">' + ind.comment + '</div></div>';
+    });
+}
+
+// ============================================================
+// VERBATIMS TOGGLE
+// ============================================================
+function toggleVerbatims() {
+    const grid = document.getElementById('verbatimGrid');
+    const toggle = document.getElementById('verbatimToggle');
+    if (grid.style.display === 'none') {
+        grid.style.display = 'block';
+        toggle.innerHTML = '\u25bc Masquer les verbatims bruts';
+    } else {
+        grid.style.display = 'none';
+        toggle.innerHTML = '\u25b6 Afficher les verbatims bruts (132 verbatims)';
+    }
+}
+
+function drawVerbatims() {
+    const container = document.getElementById('verbatimList');
+    if (!verbatims || verbatims.length === 0) {
+        container.innerHTML = '<p style="color:#666">Aucun verbatim collect\u00e9.</p>';
+        return;
+    }
+    verbatims.forEach(v => {
+        container.innerHTML += '<div class="verbatim-item">' + v + '</div>';
+    });
+}
+
+// ============================================================
+// PORTFOLIO — Entonnoir X/Y/Z (Plotly Funnel)
+// ============================================================
+function drawPortfolio() {
+    const container = document.getElementById('portfolioSection');
+    if (!portfolio || !portfolio.distribution) {
+        container.innerHTML = '<div class="card warn"><div class="lbl">Portfolio strat\u00e9gique</div><div class="comment">Classification X/Y/Z non disponible.</div></div>';
+        return;
+    }
+    const dist = portfolio.distribution;
+    const xCount = dist.X_relation_client ? dist.X_relation_client.count : 0;
+    const yCount = dist.Y_productivite ? dist.Y_productivite.count : 0;
+    const zCount = dist.Z_rd ? dist.Z_rd.count : 0;
+    const xPct = dist.X_relation_client ? dist.X_relation_client.percentage : 0;
+    const yPct = dist.Y_productivite ? dist.Y_productivite.percentage : 0;
+    const zPct = dist.Z_rd ? dist.Z_rd.percentage : 0;
+
+    const totalDedoubl = portfolio.nb_projets_dedoublonnes || (xCount + yCount + zCount);
+    const totalBruts = portfolio.nb_projets_bruts || totalDedoubl;
+    container.innerHTML = '<h3 style="margin:24px 0 12px;font-size:18px">Portfolio strat\u00e9gique X/Y/Z <span class="tt inline" data-tt-key="entonnoir_xyz">i</span></h3>' +
+        '<p style="font-size:12px;color:#888;margin:-8px 0 12px;font-style:italic">' + totalBruts + ' id\u00e9es brutes \u2192 ' + totalDedoubl + ' projets uniques apr\u00e8s d\u00e9doublonnage</p>' +
+        '<div class="plotly-chart-container" id="funnelPlotly"></div>';
+
+    if (portfolio.equilibre) {
+        container.innerHTML += '<p style="font-size:13px;color:#666;margin:12px 0">' + portfolio.equilibre + '</p>';
+    }
+    if (portfolio.commentaire_entonnoir) {
+        container.innerHTML += '<p style="font-size:13px;color:#666;margin:8px 0;font-style:italic">' + portfolio.commentaire_entonnoir + '</p>';
+    }
+
+    // Funnel chart
+    const funnelTrace = {
+        type: 'funnel',
+        y: ['X \u2014 Relation Client (' + xCount + ')', 'Y \u2014 Productivit\u00e9 (' + yCount + ')', 'Z \u2014 R&D / Innovation (' + zCount + ')'],
+        x: [xCount, yCount, zCount],
+        textinfo: 'value+percent total',
+        textposition: 'inside',
+        marker: { color: ['#0d7377', '#c8a951', '#1A3A5A'] },
+        connector: { line: { color: '#ccc', width: 1 } }
+    };
+
+    const funnelLayout = {
+        margin: { t: 10, b: 20, l: 200, r: 40 },
+        font: { family: 'DM Sans, Arial, sans-serif', size: 13 },
+        height: 250,
+        showlegend: false
+    };
+
+    Plotly.newPlot('funnelPlotly', [funnelTrace], funnelLayout, { displayModeBar: false, responsive: true });
+}
+
+// ============================================================
+// LLM ANALYSIS — avec tags catégorie + filtre
+// ============================================================
+function drawLlmAnalysis() {
+    const container = document.getElementById('llmSection');
+    const filterBar = document.getElementById('llmFilterBar');
+    if (!analyseLlm) {
+        container.innerHTML = '<div class="card warn" style="margin:16px 0"><div class="lbl">Analyse qualitative</div><div class="comment">Analyse LLM non disponible.</div></div>';
+        return;
+    }
+
+    // Check if blocs have categories
+    const hasCategories = analyseLlm.blocs_thematiques && analyseLlm.blocs_thematiques.some(b => b.categorie);
+
+    // Build filter buttons if categories exist
+    if (hasCategories) {
+        filterBar.innerHTML = '<div class="filter-buttons" id="blocFilterBtns">' +
+            '<button class="filter-btn active" data-filter="all" onclick="filterBlocs(\'all\')">Tous</button>' +
+            '<button class="filter-btn" data-filter="X_relation_client" onclick="filterBlocs(\'X_relation_client\')">Relation Client</button>' +
+            '<button class="filter-btn" data-filter="Y_productivite" onclick="filterBlocs(\'Y_productivite\')">Productivit\u00e9</button>' +
+            '<button class="filter-btn" data-filter="Z_rd" onclick="filterBlocs(\'Z_rd\')">R&D / Innovation</button>' +
+            '</div>';
+    }
+
+    const nbPistes = (analyseLlm.blocs_thematiques || []).length;
+    const pistesLabel = nbPistes > 0 ? ' : ' + nbPistes + ' piste' + (nbPistes > 1 ? 's' : '') + ' identifiée' + (nbPistes > 1 ? 's' : '') : '';
+    let html = '<h3 style="margin:24px 0 12px;font-size:18px">Analyse qualitative des verbatims' + pistesLabel + '</h3>';
+
+    if (analyseLlm.blocs_thematiques) {
+        html += '<div class="blocs-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">';
+        analyseLlm.blocs_thematiques.forEach(function(b) {
+            const cat = b.categorie || '';
+            let tagHtml = '';
+            if (cat === 'X_relation_client') tagHtml = '<span class="cat-tag x">Relation Client</span>';
+            else if (cat === 'Y_productivite') tagHtml = '<span class="cat-tag y">Productivité</span>';
+            else if (cat === 'Z_rd') tagHtml = '<span class="cat-tag z">R&D / Innovation</span>';
+
+            html += '<div class="bloc-theme" data-categorie="' + cat + '">' + tagHtml + '<h4>' + b.titre + '</h4>';
+            if (b.mot_cle_strategique) html += '<div class="keyword">' + b.mot_cle_strategique + '</div>';
+            if (b.besoins) html += '<ul>' + b.besoins.map(function(x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+
+    if (analyseLlm.problematiques_profondes) {
+        html += '<div class="insight-box"><h4>Probl\u00e9matiques profondes</h4>';
+        analyseLlm.problematiques_profondes.forEach(function(p) { html += '<p>\u2022 ' + p + '</p>'; });
+        html += '</div>';
+    }
+
+    if (analyseLlm.besoin_latent_global) {
+        html += '<div class="insight-box"><h4>Besoin latent global</h4><p>' + analyseLlm.besoin_latent_global + '</p></div>';
+    }
+
+    if (analyseLlm.angle_mort) {
+        html += '<div class="insight-box" style="background:linear-gradient(135deg,#7c2d12,#9a3412)"><h4 style="color:#fbbf24">\u26A0\uFE0F Angle mort</h4><p>' + analyseLlm.angle_mort + '</p></div>';
+    }
+
+    if (analyseLlm.question_strategique) {
+        html += '<div class="orientation"><h3>\u2753 Question strat\u00e9gique pour le dirigeant</h3><p>' + analyseLlm.question_strategique + '</p></div>';
+    }
+
+    container.innerHTML = html;
+}
+
+function filterBlocs(cat) {
+    // Update active button
+    document.querySelectorAll('#blocFilterBtns .filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-filter') === cat);
+    });
+    // Filter blocs
+    document.querySelectorAll('.bloc-theme').forEach(bloc => {
+        if (cat === 'all' || bloc.getAttribute('data-categorie') === cat) {
+            bloc.style.display = 'block';
+        } else {
+            bloc.style.display = 'none';
+        }
+    });
+}
+
+// ============================================================
+// SECTION 6
+// ============================================================
+function drawAnalysis() {
+    const bnContainer = document.getElementById('bonnesNouvelles');
+    bonnesNouvelles.forEach(function(bn) {
+        bnContainer.innerHTML += '<div class="signal good"><strong>Signal ' + bn.rang + '</strong> \u2014 ' + bn.phrase + '</div>';
+    });
+
+    const dContainer = document.getElementById('defis');
+    if (defis.length === 0) {
+        dContainer.innerHTML = '<p style="color:#666;font-style:italic">Aucun d\u00e9fi majeur identifi\u00e9.</p>';
+    } else {
+        defis.forEach(function(d) {
+            dContainer.innerHTML += '<div class="signal ' + d.gravite + '"><strong>' + d.gravite.toUpperCase() + '</strong> \u2014 ' + d.phrase + '</div>';
+        });
+    }
+
+    const oContainer = document.getElementById('orientationBox');
+    oContainer.innerHTML = '<div class="orientation"><h3>\ud83e\udded Orientation</h3><p>' + orientation.phrase + '</p></div>';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    drawDonut();
+    drawCapacityCards();
+    drawBars('barNiveau', aimParNiveau);
+    drawBars('barDept', aimParDept);
+    drawParticipants();
+    drawHeatmap();
+    drawRadar();
+    drawIndicators();
+    drawVerbatims();
+    drawPortfolio();
+    drawLlmAnalysis();
+    drawAnalysis();
+    initTooltips();
+});
+</script>
+</body>
+</html>
